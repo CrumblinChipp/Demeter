@@ -1,7 +1,17 @@
 <div class="space-y-4">
     <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold">Waste Records</h1>
-        {{-- You can add a "Download CSV" or "Add Entry" button here later --}}
+        <div class="flex justify-between items-center mt-4 mb-4">
+            <button id="openWasteModal"
+            class="bg-green-600 text-white px-5 py-2 rounded-lg shadow hover:bg-green-700 transition flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Add Waste Entry
+            </button>
+        </div>
+
+        @include('waste-modal')
     </div>
 
     {{-- TABLE --}}
@@ -9,7 +19,6 @@
         <table class="table w-full text-left">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                    <th class="p-4"><input type="checkbox" class="checkbox" /></th>
                     <th class="p-4">Date</th>
                     <th class="p-4">Building</th>
                     <th class="p-4 text-center text-emerald-700">Residual</th>
@@ -29,7 +38,6 @@
                                 $waste->biodegradable_kg + $waste->infectious_kg;
                 @endphp
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="p-4"><input type="checkbox" class="checkbox" /></td>
                     <td class="p-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($waste->date)->format('M d, Y') }}</td>
                     <td class="p-4 font-medium">{{ $waste->building->name }}</td>
 

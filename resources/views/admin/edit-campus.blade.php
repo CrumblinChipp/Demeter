@@ -105,40 +105,40 @@
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-      const container = document.getElementById('buildings-container');
-      const addBtn = document.getElementById('add-building-btn');
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('buildings-container');
+    const addBtn = document.getElementById('add-building-btn');
 
-      // 1. Add New Building Row
-      addBtn.addEventListener('click', function() {
-          const uniqueId = 'new_' + Date.now(); // Creates a timestamp-based ID for the backend
-          const row = document.createElement('div');
-          row.className = 'flex items-center gap-2 building-row animate-fadeIn'; // Optional: add a CSS fade class
-          
-          row.innerHTML = `
-              <input type="text" name="buildings[${uniqueId}]" 
+    // 1. Add New Building Row
+    addBtn.addEventListener('click', function() {
+        const uniqueId = 'new_' + Date.now(); // Creates a timestamp-based ID for the backend
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-2 building-row animate-fadeIn'; // Optional: add a CSS fade class
+        
+        row.innerHTML = `
+            <input type="text" name="buildings[${uniqueId}]" 
                     placeholder="Enter building name" 
                     class="flex-1 rounded-md border-gray-300 shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500" 
                     required>
-              <button type="button" class="remove-building-btn text-red-400 hover:text-red-600 transition px-2 text-xl">&times;</button>
-          `;
-          
-          container.appendChild(row);
-      });
+            <button type="button" class="remove-building-btn text-red-400 hover:text-red-600 transition px-2 text-xl">&times;</button>
+        `;
+        
+        container.appendChild(row);
+    });
 
-      // 2. Remove Building Row (Event Delegation)
-      container.addEventListener('click', function(e) {
-          if (e.target.classList.contains('remove-building-btn')) {
-              const rows = container.querySelectorAll('.building-row');
-              
-              // Safety: Don't let them delete the last building
-              if (rows.length > 1) {
-                  e.target.closest('.building-row').remove();
-              } else {
-                  alert("A campus must have at least one building.");
-              }
-          }
-      });
-  });
+    // 2. Remove Building Row (Event Delegation)
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-building-btn')) {
+            const rows = container.querySelectorAll('.building-row');
+            
+            // Safety: Don't let them delete the last building
+            if (rows.length > 1) {
+                e.target.closest('.building-row').remove();
+            } else {
+                alert("A campus must have at least one building.");
+            }
+        }
+    });
+});
 
 </script>

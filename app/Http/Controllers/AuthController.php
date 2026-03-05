@@ -13,7 +13,7 @@ class AuthController
     // Show the page
     public function index()
     {
-        return view('login'); // Change this to your actual blade file name
+        return view('login');
     }
 
     // Handle Login
@@ -52,14 +52,15 @@ class AuthController
                         ->withInput();
         }
 
-        User::create([
+    $user = User::create([
             'name' => $request->name,
             'sr_code' => $request->sr_code,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        Auth::attempt($request->only('email', 'password'));
+        // Log the user in directly
+        Auth::login($user);
 
         return redirect()->route('homepage');
     }

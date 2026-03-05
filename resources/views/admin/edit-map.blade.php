@@ -420,12 +420,12 @@
                 );
                 markerLayer.appendChild(permanentMarker);
 
-                alert(`Marker for "${name}" saved successfully!`);
+                showToast(`Marker for "${name}" saved successfully!`);
                 resetFormState(); 
 
             } catch (error) {
                 console.error('Error saving/updating marker:', error);
-                alert('Failed to save marker. Check console for details.');
+                showToast('Failed to save Marker','error');
             }
         });
 

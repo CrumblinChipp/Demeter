@@ -31,7 +31,6 @@ class CampusController
         $campus->name = $validated['campus_name'];
 
     if ($request->hasFile('map')) {
-        
         $path = $request->file('map')->store('maps', 'public');
         $campus->map = $path; 
     }
@@ -78,6 +77,31 @@ class CampusController
         ])->with('success', 'Campus updated successfully!');
     }
 
+    public function store(Request $request)
+    {
+        $request->validate([
+            'campus_name' => 'required|string|max:255',
+            'map' => 'nullable|image|max:2048',
+            'buildings' => 'required|array|min:1',
+            'buildings.*' => 'required|string|max:255'
+        ]);
+
+        // 1. Save Campus
+        $campus = new Campus();
+        $campus->name = $request->campus_name;
+        if ($request->hasFile('map')) {
+            $path = $request->file('map')->store('maps', 'public');
+            $campus->map = $path;
+        }
+        $campus->save();
+
+        // 2. Save Buildings
+        foreach ($request->buildings as $name) {
+            $campus->buildings()->create(['name' => $name]);
+        }
+
+        return redirect()->back()->with('success', 'Campus and buildings created successfully!');
+    }
     public function destroy(Campus $campus)
     {
         try {

@@ -117,6 +117,7 @@
         @endif
 
     </main>
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-3"></div>
 
     <script>
         function switchSection(sectionId) {
@@ -149,6 +150,39 @@
         });
     function submitFilterForm() {
         document.getElementById('globalFilterForm').submit();
+    }
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        
+        // Create toast element
+        const toast = document.createElement('div');
+        
+        // Set colors based on type
+        const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-red-600';
+        const icon = type === 'success' 
+            ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+            : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+
+        toast.className = `${bgColor} text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
+        
+        toast.innerHTML = `
+            <span class="p-1 bg-white/20 rounded-full">${icon}</span>
+            <span class="font-medium">${message}</span>
+        `;
+
+        container.appendChild(toast);
+
+        // Animate In
+        setTimeout(() => {
+            toast.classList.remove('translate-y-10', 'opacity-0');
+        }, 10);
+
+        // Auto-remove after 4 seconds
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-x-10'); // Slide out effect
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
     }
     </script>
 </body>

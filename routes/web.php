@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CampusController;
 use App\Http\Controllers\BuildingController;
 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -23,6 +24,8 @@ Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 
 Route::delete('/waste/{waste}', [WasteEntryController::class, 'destroy'])->name('waste.destroy');
 
+Route::post('/waste/store', [WasteEntryController::class, 'store'])->name('waste.store');
+
 Route::prefix('admin')->name('admin.')->group(function () {
     
     // Update Campus (Handles the name, map upload, and buildings)
@@ -31,7 +34,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Delete Campus
     Route::delete('/campus/{campus}', [CampusController::class, 'destroy'])->name('campus.destroy');
 
+    // Add Campus
+    Route::post('/campus', [CampusController::class, 'store'])->name('campus.store');
 });
 
 Route::put('/buildings/{building}/coordinates', [BuildingController::class, 'updateCoordinates'])
     ->name('buildings.coordinates.update');
+
+Route::get('/api/campuses/{campus}/buildings', function ($campusId) {
+    // Fetch buildings where campus_id matches the passed ID
+    return \App\Models\Building::where('campus_id', $campusId)->get();
+});
