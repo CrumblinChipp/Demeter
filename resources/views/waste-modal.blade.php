@@ -115,35 +115,34 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // 3. Final Submission
-    document.getElementById('confirmSubmit').onclick = async function() {
-        const data = {
-            name: document.getElementById('entryName').value,
-            campus_id: campusSelect.value,
-            building_id: buildingSelect.value,
-            biodegradable_kg: document.getElementById('biodegradable_kg').value || 0,
-            recyclable_kg: document.getElementById('recyclable_kg').value || 0,
-            residual_kg: document.getElementById('residual_kg').value || 0,
-            infectious_kg: document.getElementById('infectious_kg').value || 0,
-            _token: '{{ csrf_token() }}'
-        };
+        document.getElementById('confirmSubmit').onclick = async function() {
+            const data = {
+                name: document.getElementById('entryName').value,
+                campus_id: campusSelect.value,
+                building_id: buildingSelect.value,
+                biodegradable_kg: document.getElementById('biodegradable_kg').value || 0,
+                recyclable_kg: document.getElementById('recyclable_kg').value || 0,
+                residual_kg: document.getElementById('residual_kg').value || 0,
+                infectious_kg: document.getElementById('infectious_kg').value || 0,
+                _token: '{{ csrf_token() }}'
+            };
 
-        try {
-            const response = await fetch('{{ route("waste.store") }}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            try {
+                const response = await fetch('{{ route("waste.store") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-            if (response.ok) {
                 if (response.ok) {
                     showToast('Waste entry recorded successfully!', 'success');
-                    
                     setTimeout(() => location.reload(), 1500);
-                location.reload();
+                } else {
+                    showToast('Server error. Please try again.', 'error');
+                }
+            } catch (error) {
+                showToast('Failed to save entry. Please check your connection.', 'error');
             }
-        } catch (error) {
-            showToast('Failed to save entry. Please check your data.', 'error');
-        }
-    };
+        };
 });
 </script>

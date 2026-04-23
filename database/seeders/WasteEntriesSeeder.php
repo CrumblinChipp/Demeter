@@ -13,7 +13,7 @@ class WasteEntriesSeeder extends Seeder
         $buildingIds = DB::table('buildings')->pluck('id')->toArray();
         $userIds = DB::table('users')->pluck('id')->toArray();
 
-        $daysBack = 90; // last 90 days
+        $daysBack = 14; // last (decide how many days) days
 
         foreach ($buildingIds as $buildingId) {
             for ($i = 0; $i < $daysBack; $i++) {

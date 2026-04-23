@@ -7,12 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Campus extends Model
 {
     protected $fillable = [
+        'building_id',
         'name',
-        'map',
+        'status',
+        'current_weight',
     ];
-
-    public $timestamps = false;
-
     public function buildings()
     {
         return $this->hasMany(Building::class);

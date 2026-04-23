@@ -9,9 +9,10 @@
             </svg>
             Add Waste Entry
             </button>
+            @include('waste-modal')
         </div>
 
-        @include('waste-modal')
+        
     </div>
 
     {{-- TABLE --}}

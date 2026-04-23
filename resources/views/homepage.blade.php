@@ -63,6 +63,16 @@
         <span class="hidden md:inline text-2xl">Map</span>
     </a>
 
+    {{-- Bins --}}
+    <a href="{{ route('homepage', ['section' => 'bin']) }}"
+        data-nav="bin"
+    class="nav-item w-full flex flex-col md:flex-row items-center gap-1 px-3 py-2 rounded-md transition
+    {{ $currentSection == 'bin' ? 'bg-green-900/50 text-white' : 
+        'text-gray-200 hover:bg-green-900/30' }}">
+        <span>⚲</span>
+        <span class="hidden md:inline text-2xl">Bins</span>
+    </a>
+
     {{-- Data --}}
     <a href="{{ route('homepage', ['section' => 'data']) }}"
         data-nav="data"
@@ -103,6 +113,11 @@
         @elseif($currentSection == 'map')
             <section data-section="map" class="content-section">
                 @include('maps')
+            </section>
+
+        @elseif($currentSection == 'bin')
+            <section data-section="bin" class="content-section">
+                @include('bin')
             </section>
 
         @elseif($currentSection == 'data')

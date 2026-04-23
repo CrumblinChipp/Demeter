@@ -39,21 +39,27 @@ public function getStats(Request $request, $campusId) {
                     SUM(recyclable_kg) as recyclable, SUM(infectious_kg) as infectious')
         ->first();
 
-    // 6. Waste Per Building (Bar Chart)
+    // 6. Waste Per Building (Bar Chart total)
     $perBuilding = (clone $baseQuery)
-        ->join('buildings', 'waste_entries.building_id', '=', 'buildings.id') // JOIN IS KEY HERE
+        ->join('buildings', 'waste_entries.building_id', '=', 'buildings.id')
         ->selectRaw('buildings.name, SUM(residual_kg + recyclable_kg + biodegradable_kg + infectious_kg) as total')
         ->groupBy('buildings.name')
         ->pluck('total', 'name');
 
-    // 7. Per Building Per Day (Multi-line Chart)
-    // Fetch everything in one go, then group in PHP to avoid nested loops
-    $buildingDaily = (clone $baseQuery)
-        ->join('buildings', 'waste_entries.building_id', '=', 'buildings.id') // JOIN IS KEY HERE
-        ->selectRaw('buildings.name, date, SUM(residual_kg + recyclable_kg + biodegradable_kg + infectious_kg) as total')
-        ->groupBy('buildings.name', 'date')
+    // 6. Waste Per Building (Stacked Bar Chart Data)
+    $perBuildingWaste = (clone $baseQuery)
+        ->join('buildings', 'waste_entries.building_id', '=', 'buildings.id')
+        ->selectRaw('
+            buildings.name, 
+            SUM(biodegradable_kg) as bio, 
+            SUM(residual_kg) as res, 
+            SUM(recyclable_kg) as rec, 
+            SUM(infectious_kg) as inf,
+            SUM(residual_kg + recyclable_kg + biodegradable_kg + infectious_kg) as total
+        ')
+        ->groupBy('buildings.name')
         ->get()
-        ->groupBy('name');
+        ->keyBy('name'); // This makes it easier to loop through in JS
 
     return [
         'dailyLabels'     => $dailyTotals->keys(),
@@ -61,7 +67,7 @@ public function getStats(Request $request, $campusId) {
         'summary'         => $summary,
         'composition'     => $composition,
         'buildingTotals'  => $perBuilding,
-        'buildingDaily'   => $buildingDaily,
+        'buildingWaste'   => $perBuildingWaste,
         'selectedCampus'  => $campusId,
         'selectedDays'    => $days,
         'campuses'        => Campus::all()

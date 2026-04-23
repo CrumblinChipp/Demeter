@@ -35,6 +35,14 @@ class BuildingsSeeder extends Seeder
                 'campus_id' => $campusId,
                 'name'      => 'CEAFA',
             ],
+            [
+                'campus_id' => $campusId,
+                'name'      => 'STEER HUB',
+            ],
+            [
+                'campus_id' => $campusId,
+                'name'      => 'RGR',
+            ],
         ]);
     }
 }

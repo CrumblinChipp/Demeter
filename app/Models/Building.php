@@ -14,14 +14,4 @@ class Building extends Model
     ];
 
     public $timestamps = false;
-
-    public function campus()
-    {
-        return $this->belongsTo(Campus::class);
-    }
-
-    public function wasteEntries()
-    {
-        return $this->hasMany(WasteEntry::class);
-    }
 }

@@ -102,7 +102,7 @@
         <div class="flex flex-col lg:flex-row gap-6">
             {{-- The Chart --}}
             <div class="flex-1 h-80 relative">
-                <canvas id="buildingLineChart"></canvas>
+                <canvas id="buildingBarChart"></canvas>
             </div>
             
             {{-- The Side Legend/Stats (Rendered via Blade for speed) --}}
@@ -111,7 +111,7 @@
                 @foreach($buildingTotals as $name => $total)
                 <div class="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-100">
                     <span class="text-sm font-medium text-gray-700 truncate w-32" title="{{ $name }}">{{ $name }}</span>
-                    <span class="text-sm font-bold text-emerald-600">{{ number_format($total, 1) }} kg</span>
+                    <span class="text-sm font-bold text-emerald-600">{{ number_format($total, 1.0) }} kg</span>
                 </div>
                 @endforeach
             </div>
@@ -125,7 +125,7 @@
         labels: @json($dailyLabels),
         values: @json($dailyValues),
         composition: @json($composition),
-        buildingDaily: @json($buildingDaily)
+        buildingWaste: @json($buildingWaste)
     };
 </script>
 
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const data = window.dashboardData;
     const ctxLine = document.getElementById('lineChart');
     const ctxDonut = document.getElementById('donutChart');
-    const ctxBuilding = document.getElementById('buildingLineChart');
+    const ctxBuilding = document.getElementById('buildingBarChart');
 
     // Color Palette for Buildings (Emerald/Teal Theme)
     const chartColors = [
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ],
                     backgroundColor: [
                         '#22c55e', // Green (Bio)
-                        '#64748b', // Slate (Residual)
+                        '#fdda0d', // Yellow (Residual)
                         '#3b82f6', // Blue (Recyclable)
                         '#ef4444'  // Red (Infectious)
                     ],
@@ -240,71 +240,63 @@ document.addEventListener('DOMContentLoaded', function() {
     /* ----------------------------------------------------------------
      * CHART 3: Per-Building Breakdown (Multi-Line)
      * ---------------------------------------------------------------- */
-    if (ctxBuilding && data.buildingDaily) {
+    if (ctxBuilding && data.buildingWaste) {
         
-        // Transform the PHP grouped data into Chart.js datasets
-        const buildingDatasets = [];
-        let colorIndex = 0;
+        // 1. Get building names for the X-axis labels
+        const buildingNames = Object.keys(data.buildingWaste);
 
-        // Iterate through each building name in the object
-        for (const [buildingName, entries] of Object.entries(data.buildingDaily)) {
-            
-            // "Map" the data: ensure every date in the main labels has a value
-            const buildingDataPoints = data.labels.map(dateLabel => {
-                // Find the entry for this specific date
-                const entry = entries.find(e => e.date === dateLabel);
-                return entry ? entry.total : 0; // If found return total, else 0
-            });
-
-            buildingDatasets.push({
-                label: buildingName,
-                data: buildingDataPoints,
-                borderColor: chartColors[colorIndex % chartColors.length],
-                backgroundColor: 'transparent',
-                borderWidth: 2,
-                tension: 0.3,
-                pointRadius: 2,
-                pointHoverRadius: 5
-            });
-
-            colorIndex++;
-        }
+        // 2. Map the totals for each category into arrays
+        const bioData = buildingNames.map(name => data.buildingWaste[name].bio || 0);
+        const resData = buildingNames.map(name => data.buildingWaste[name].res || 0);
+        const recData = buildingNames.map(name => data.buildingWaste[name].rec || 0);
+        const infData = buildingNames.map(name => data.buildingWaste[name].inf || 0);
 
         new Chart(ctxBuilding, {
-            type: 'line',
+            type: 'bar',
             data: {
-                labels: data.labels,
-                datasets: buildingDatasets
+                labels: buildingNames,
+                datasets: [
+                    {
+                        label: 'Biodegradable',
+                        data: bioData,
+                        backgroundColor: '#22c55e', // Matching your donut colors
+                    },
+                    {
+                        label: 'Residual',
+                        data: resData,
+                        backgroundColor: '#fdda0d',
+                    },
+                    {
+                        label: 'Recyclable',
+                        data: recData,
+                        backgroundColor: '#3b82f6',
+                    },
+                    {
+                        label: 'Infectious',
+                        data: infData,
+                        backgroundColor: '#ef4444',
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
+                scales: {
+                    x: { stacked: true },
+                    y: { 
+                        stacked: true,
+                        beginAtZero: true,
+                        title: { display: true, text: 'Total Waste (kg)' }
+                    }
                 },
                 plugins: {
-                    legend: {
-                        position: 'top',
-                        align: 'end',
-                        labels: { boxWidth: 10, usePointStyle: true }
-                    },
+                    legend: { position: 'top', align: 'end' },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
                                 return context.dataset.label + ': ' + context.parsed.y + ' kg';
                             }
                         }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { borderDash: [2, 4] }
-                    },
-                    x: {
-                        grid: { display: false }
                     }
                 }
             }
