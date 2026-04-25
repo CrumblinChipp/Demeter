@@ -3,25 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Bin extends Model
 {
-    protected $primaryKey = 'bin_id'; // Ensure Laravel knows your custom PK
+    use HasFactory;
 
-    /**
-     * Get the human-readable status label based on percentage.
-     */
-    protected function statusLabel(): Attribute
+    protected $table = 'smart_bins';
+    protected $primaryKey = 'bin_id';
+
+    protected $fillable = [
+        'building_id',
+        'name',
+        'waste_type',
+        'status',
+        'current_weight',
+    ];
+
+    public function building()
     {
-        return Attribute::make(
-            get: function () {
-                $percentage = $this->status;
-
-                if ($percentage >= 90) return 'Full';
-                if ($percentage >= 50) return 'Mid';
-                return 'Empty';
-            },
-        );
+        return $this->belongsTo(Building::class);
     }
+
 }

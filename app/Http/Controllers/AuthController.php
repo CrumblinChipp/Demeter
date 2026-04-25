@@ -46,7 +46,6 @@ class AuthController
         ]);
 
         if ($validator->fails()) {
-            // Redirect back to the #register tab so the user sees the errors
             return redirect(url()->previous() . '#register')
                         ->withErrors($validator)
                         ->withInput();

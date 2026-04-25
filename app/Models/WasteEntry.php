@@ -28,10 +28,8 @@ class WasteEntry extends Model
         return $query->where('date', '>=', now()->subDays($days - 1)->toDateString());
     }
 
-    // Helper to sum all waste types in SQL
     public function scopeSelectTotalWaste($query)
     {
-        // Change these to match your actual database columns (e.g., adding _kg)
         return $query->selectRaw('SUM(residual_kg + recyclable_kg + biodegradable_kg + infectious_kg) as total');
     }
 

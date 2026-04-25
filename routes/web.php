@@ -42,6 +42,5 @@ Route::put('/buildings/{building}/coordinates', [BuildingController::class, 'upd
     ->name('buildings.coordinates.update');
 
 Route::get('/api/campuses/{campus}/buildings', function ($campusId) {
-    // Fetch buildings where campus_id matches the passed ID
     return \App\Models\Building::where('campus_id', $campusId)->get();
 });

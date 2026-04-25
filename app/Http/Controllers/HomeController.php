@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Campus;
 use App\Models\WasteEntry;
 use App\Models\Building;
+use App\Models\Bin;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BinController;
+
 class HomeController
 {
 
@@ -24,7 +27,6 @@ class HomeController
             'selectedDays' => $request->days ?? 7,
         ];
 
-        // ONLY fetch dashboard math if we are actually on the dashboard
         if ($section === 'dashboard') {
             $dashboardController = new DashboardController();
             $stats = $dashboardController->getStats($request, $data['selectedCampus']);
@@ -36,22 +38,31 @@ class HomeController
             $data['wastes'] = WasteEntry::whereHas('building', function($q) use ($campusId) {
                     $q->where('campus_id', $campusId);
                 })
-                ->with('building') // Eager load to prevent 100+ database queries (N+1)
+                ->with('building')
                 ->orderBy('date', 'desc')
                 ->paginate($perPage)
-                ->withQueryString(); // Keeps ?section=data&campus=1 in pagination links
+                ->withQueryString();
         }
         elseif ($section === 'map') {
         // 1. Fetch the specific campus
             $data['campus'] = Campus::with(['buildings' => function($query) {
-                // Only get buildings that have been placed on the map
                 $query->whereNotNull('map_x_percent')->whereNotNull('map_y_percent');
             }])->find($campusId);
 
-            // 2. Safety check: if no campus found, grab the first one
             if (!$data['campus']) {
                 $data['campus'] = Campus::first();
             }
+        }
+
+        elseif ($section ==='bin') {
+            $perPage = $request->input('per_page', 20);
+
+            $data['smart_bins'] = Bin::whereHas('building', function($q) use ($campusId) {
+                    $q->where('campus_id', $campusId);
+                })
+                ->orderBy('name', 'asc')
+                ->paginate($perPage)
+                ->withQueryString();
         }
         elseif ($section === 'admin') {
             // Default to 'add-campus' if no tab is specified
