@@ -44,13 +44,16 @@ class HomeController
                 ->withQueryString();
         }
         elseif ($section === 'map') {
-        // 1. Fetch the specific campus
-            $data['campus'] = Campus::with(['buildings' => function($query) {
-                $query->whereNotNull('map_x_percent')->whereNotNull('map_y_percent');
-            }])->find($campusId);
+            $data['campus'] = Campus::with([
+                'buildings' => function($query) {
+                    $query->whereNotNull('map_x_percent')
+                        ->whereNotNull('map_y_percent')
+                        ->with('smart_bins');
+                }
+            ])->find($campusId);
 
             if (!$data['campus']) {
-                $data['campus'] = Campus::first();
+                $data['campus'] = Campus::with('buildings.smart_bins')->first();
             }
         }
 

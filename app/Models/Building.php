@@ -14,4 +14,9 @@ class Building extends Model
     ];
 
     public $timestamps = false;
+
+    public function smart_bins()
+    {
+        return $this->hasMany(Bin::class, 'building_id');
+    }
 }

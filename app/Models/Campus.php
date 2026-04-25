@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Campus extends Model
 {
     protected $fillable = [
-        'building_id',
+        'campus_id',
         'name',
-        'status',
-        'current_weight',
+        'map',
     ];
+
     public function buildings()
     {
-        return $this->hasMany(Building::class);
+        return $this->hasMany(Building::class, 'campus_id');
     }
 }

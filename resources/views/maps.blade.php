@@ -1,15 +1,6 @@
-@php
-    // 1. Define the palette at the TOP of the file
-    $colorPalette = [
-        'bg-red-600', 'bg-blue-600', 'bg-emerald-600', 'bg-amber-500', 
-        'bg-purple-600', 'bg-pink-600', 'bg-indigo-600', 'bg-cyan-600',
-        'bg-orange-500', 'bg-lime-500', 'bg-rose-600'
-    ];
-    
-    // Safety check for the count() function
-    $paletteCount = count($colorPalette);
-@endphp
-
+<div class="flex justify-between items-center">
+    <h1 class="text-3xl font-bold">Campus Map</h1>
+</div>
 <div class="flex flex-col lg:flex-row gap-6">
     {{-- Left Side: The Interactive Map --}}
     <div class="lg:w-3/4 relative bg-gray-200 rounded-xl shadow-inner overflow-hidden border-4 border-white">
@@ -23,30 +14,100 @@
                 <div class="absolute inset-0">
                     @foreach($campus->buildings as $building)
                         @php
-                            // Calculate the color once per building
-                            $colorClass = $colorPalette[$building->id % $paletteCount];
+                            $bins = $building->smart_bins;
+
+                            if ($bins->count()) {
+                                $maxFill = $bins->max('status');
+
+                                if ($maxFill >= 71) {
+                                    $bgColor = 'bg-red-600';
+                                    $label = 'Full';
+                                } elseif ($maxFill >= 11) {
+                                    $bgColor = 'bg-amber-500';
+                                    $label = 'Filled';
+                                } else {
+                                    $bgColor = 'bg-green-600';
+                                    $label = 'Empty';
+                                }
+
+                            } else {
+                                $maxFill = null;
+                                $bgColor = 'bg-gray-500';
+                                $label = 'No bins';
+                            }
                         @endphp
-
-                        <div class="absolute group cursor-help"
+                        {{-- The Actual Marker --}}
+                        <div class="absolute group cursor-pointer building-marker"
+                            data-building='@json($building->smart_bins)'
+                            data-name="{{ $building->name }}"
                             style="left: {{ $building->map_x_percent }}%; 
-                                    top: {{ $building->map_y_percent }}%; 
-                                    transform: translate(-50%, -50%);">
-                            
-                            {{-- 1. The Pulse Effect --}}
-                            <div class="absolute inset-0 rounded-full {{ $colorClass }} animate-ping opacity-25"></div>
-                            
-                            {{-- 2. The Actual Marker --}}
-                            <div class="relative w-4 h-4 {{ $colorClass }} border-2 border-white rounded-full shadow-md group-hover:scale-125 transition-transform"></div>
+                                top: {{ $building->map_y_percent }}%; 
+                                transform: translate(-50%, -50%);">
 
-                            {{-- 3. Tooltip/Label --}}
-                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                                <div class="bg-gray-900 text-white text-xs py-1 px-3 rounded-lg whitespace-nowrap shadow-xl">
-                                    {{ $building->name }}
+                            @php
+                                $bins = $building->smart_bins;
+
+                                if ($bins->count()) {
+                                    $maxFill = $bins->max('status');
+
+                                    if ($maxFill >= 71) {
+                                        $color = '#dc2626'; // red
+                                    } elseif ($maxFill >= 11) {
+                                        $color = '#f59e0b'; // amber
+                                    } else {
+                                        $color = '#16a34a'; // green
+                                    }
+
+                                } else {
+                                    $maxFill = null;
+                                    $color = '#6b7280'; // gray
+                                }
+
+                                $radius = 16;
+                                $circumference = 2 * pi() * $radius;
+                                $offset = $maxFill !== null 
+                                    ? $circumference - ($maxFill / 100) * $circumference 
+                                    : $circumference;
+                            @endphp
+
+                            <div class="relative w-12 h-12">
+                                <svg class="w-full h-full transform -rotate-90">
+
+                                    {{-- Background circle --}}
+                                    <circle
+                                        cx="24"
+                                        cy="24"
+                                        r="{{ $radius }}"
+                                        stroke="#e5e7eb"
+                                        stroke-width="4"
+                                        fill="transparent"
+                                    />
+
+                                    {{-- Progress circle --}}
+                                    <circle
+                                        cx="24"
+                                        cy="24"
+                                        r="{{ $radius }}"
+                                        stroke="{{ $color }}"
+                                        stroke-width="4"
+                                        fill="transparent"
+                                        stroke-dasharray="{{ $circumference }}"
+                                        stroke-dashoffset="{{ $offset }}"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+
+                                {{-- Center Text --}}
+                                <div class="absolute inset-0 flex items-center justify-center text-xs font-bold">
+                                    {{ is_null($maxFill) ? '?' : $maxFill . '%' }}
                                 </div>
-                                {{-- Tooltip Arrow --}}
-                                <div class="w-2 h-2 bg-gray-900 rotate-45 mx-auto -mt-1"></div>
                             </div>
                         </div>
+
+                        <div id="bin-tooltip"
+                            class="hidden fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs pointer-events-none min-w-[160px]">
+                        </div>
+
                     @endforeach
                 </div>
             </div>
@@ -57,27 +118,59 @@
             </div>
         @endif
     </div>
-
-    {{-- Right Side: Directory --}}
-    <div class="lg:w-1/4">
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-            <h3 class="font-bold text-gray-800 border-b pb-3 mb-4">Building Directory</h3>
-            <ul class="space-y-2">
-                @forelse($campus->buildings as $building)
-                    @php
-                        // 3. Use the pre-calculated count and the correct variable name
-                        $colorClass = $colorPalette[$building->id % $paletteCount];
-                    @endphp
-                    
-                    <li class="flex items-center text-sm text-gray-600 group">
-                        {{-- The Dot --}}
-                        <span class="w-3 h-3 {{ $colorClass }} rounded-full mr-2 border border-white shadow-sm transition-transform group-hover:scale-125"></span>
-                        {{ $building->name }}
-                    </li>
-                @empty
-                    <li class="text-sm text-gray-400 italic">No buildings marked yet.</li>
-                @endforelse
-            </ul>
-        </div>
-    </div>
 </div>
+
+<script>
+window.addEventListener("load", () => {
+    const tooltip = document.getElementById("bin-tooltip");
+
+    document.querySelectorAll(".building-marker").forEach(marker => {
+
+        marker.addEventListener("mouseenter", () => {
+            const bins = JSON.parse(marker.dataset.building);
+            const name = marker.dataset.name;
+
+            let html = `<div class="font-bold text-gray-800 mb-2">${name}</div>`;
+
+            if (bins.length === 0) {
+                html += `<div class="text-gray-500 italic">No bin installed</div>`;
+            } else {
+                html += `
+                    <table class="w-full text-xs">
+                        <tbody>
+                            ${bins.map(bin => {
+
+                                let color = 'text-green-600';
+                                if (bin.status >= 71) color = 'text-red-600';
+                                else if (bin.status >= 11) color = 'text-amber-500';
+
+                                return `
+                                    <tr>
+                                        <td class="pr-4">${bin.waste_type}</td>
+                                        <td class="text-right font-semibold ${color}">
+                                            ${bin.status}%
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join("")}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            tooltip.innerHTML = html;
+            tooltip.classList.remove("hidden");
+        });
+
+        marker.addEventListener("mousemove", (e) => {
+            tooltip.style.left = (e.clientX + 12) + "px";
+            tooltip.style.top = (e.clientY + 12) + "px";
+        });
+
+        marker.addEventListener("mouseleave", () => {
+            tooltip.classList.add("hidden");
+        });
+
+    });
+});
+</script>
