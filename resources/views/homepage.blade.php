@@ -43,6 +43,7 @@
             <div class="text-white font-semibold">DEMETER</div>
         </div>
     </div>
+
     {{-- Navigation --}}
     <a href="{{ route('homepage', ['section' => 'dashboard']) }}"
         data-nav="dashboard"
@@ -132,7 +133,7 @@
         @endif
 
     </main>
-    <div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-3"></div>
+    <d  iv id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-3"></div>
 
     <script>
         function switchSection(sectionId) {
@@ -163,6 +164,7 @@
             const currentHash = window.location.hash.replace('#', '') || 'dashboard';
             switchSection(currentHash);
         });
+
     function submitFilterForm() {
         document.getElementById('globalFilterForm').submit();
     }

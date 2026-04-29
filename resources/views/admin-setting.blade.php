@@ -1,7 +1,7 @@
 <div class="w-full">
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-800">Admin Settings</h1>
-        <p class="text-gray-600">Manage campuses, buildings, and system configurations.</p>
+        <p class="text-gray-600">Manage campuses, buildings, bins, and system configurations.</p>
     </div>
 
     {{-- TOP TAB NAVIGATION --}}

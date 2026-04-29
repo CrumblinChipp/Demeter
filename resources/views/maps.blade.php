@@ -3,11 +3,11 @@
 </div>
 <div class="flex flex-col lg:flex-row gap-6">
     {{-- Left Side: The Interactive Map --}}
-    <div class="lg:w-3/4 relative bg-gray-200 rounded-xl shadow-inner overflow-hidden border-4 border-white">
+    <div class="lg: relative bg-gray-200 rounded-xl shadow-inner overflow-hidden border-4 border-white">
         @if($campus && $campus->map)
             <div class="relative inline-block w-full">
                 <img src="{{ asset('storage/' . $campus->map) }}" 
-                    alt="{{ $campus->name }} Map" 
+                    alt="{{ $campus->name }} Map"
                     class="w-full h-auto block">
 
                 {{-- The Markers Layer --}}
@@ -40,13 +40,12 @@
                         <div class="absolute group cursor-pointer building-marker"
                             data-building='@json($building->smart_bins)'
                             data-name="{{ $building->name }}"
+                            data-id="{{ $building->id }}"
                             style="left: {{ $building->map_x_percent }}%; 
                                 top: {{ $building->map_y_percent }}%; 
                                 transform: translate(-50%, -50%);">
 
                             @php
-                                $bins = $building->smart_bins;
-
                                 if ($bins->count()) {
                                     $maxFill = $bins->max('status');
 
@@ -73,7 +72,6 @@
                             <div class="relative w-12 h-12">
                                 <svg class="w-full h-full transform -rotate-90">
 
-                                    {{-- Background circle --}}
                                     <circle
                                         cx="24"
                                         cy="24"
@@ -83,7 +81,6 @@
                                         fill="transparent"
                                     />
 
-                                    {{-- Progress circle --}}
                                     <circle
                                         cx="24"
                                         cy="24"
@@ -97,7 +94,6 @@
                                     />
                                 </svg>
 
-                                {{-- Center Text --}}
                                 <div class="absolute inset-0 flex items-center justify-center text-xs font-bold">
                                     {{ is_null($maxFill) ? '?' : $maxFill . '%' }}
                                 </div>
@@ -171,6 +167,15 @@ window.addEventListener("load", () => {
             tooltip.classList.add("hidden");
         });
 
+        marker.addEventListener("click", () => {
+            const buildingId = marker.dataset.id;
+
+            // Redirect to bin section with filter
+            window.location.href = `/homepage?section=bin&building=${buildingId}`;
+        });
+
     });
+    
+
 });
 </script>

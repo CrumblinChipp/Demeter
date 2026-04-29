@@ -26,7 +26,6 @@
             <label class="text-sm font-medium text-gray-600">Period:</label>
             <select name="days" onchange="submitFilterForm()"
                 class="bg-gray-50 text-gray-900 text-sm rounded-lg border border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 p-2">
-                {{-- FIX: Variable name changed from $selectedRange to $selectedDays to match Controller --}}
                 <option value="7"  {{ $selectedDays == 7 ? 'selected' : '' }}>Last Week</option>
                 <option value="30" {{ $selectedDays == 30 ? 'selected' : '' }}>Last 30 Days</option>
                 <option value="90" {{ $selectedDays == 90 ? 'selected' : '' }}>Last 90 Days</option>
@@ -58,7 +57,6 @@
             <div class="text-4xl text-gray-800 font-bold mt-3">
                 {{ $summary['lowest'] }} <span class="text-lg font-normal text-gray-500">kg</span>
             </div>
-            {{-- Note: We didn't pass lowest_date in controller, but you can add it if needed --}}
             <div class="text-xs text-gray-400 mt-2">Best recorded day</div>
         </div>
 
@@ -96,7 +94,7 @@
     {{-- Per Building Analysis --}}
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex justify-between items-end mb-4">
-            <div class="font-semibold text-gray-700">Waste by Building (Daily Breakdown)</div>
+            <div class="font-semibold text-gray-700">Waste by Building</div>
         </div>
         
         <div class="flex flex-col lg:flex-row gap-6">
@@ -144,7 +142,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const ctxDonut = document.getElementById('donutChart');
     const ctxBuilding = document.getElementById('buildingBarChart');
 
-    // Color Palette for Buildings (Emerald/Teal Theme)
     const chartColors = [
         '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', 
         '#ec4899', '#6366f1', '#14b8a6', '#f97316', '#84cc16'
@@ -238,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /* ----------------------------------------------------------------
-     * CHART 3: Per-Building Breakdown (Multi-Line)
+     * CHART 3: Per-Building Breakdown (Multi-Bar)
      * ---------------------------------------------------------------- */
     if (ctxBuilding && data.buildingWaste) {
         
