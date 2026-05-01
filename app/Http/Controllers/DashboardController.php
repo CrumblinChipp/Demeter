@@ -6,15 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\Campus;
 use App\Models\WasteEntry;
 use App\Models\Building;
+use App\Models\Bin;
 use Carbon\Carbon;
 
 class DashboardController
 {
     public function getStats(Request $request, $campusId) {
         $days = $request->input('days', 7);
-        $baseQuery = WasteEntry::forCampus($campusId)->inDateRange($days);
 
-        // 2. Base Query (Reused for all stats)
+        // Base Query (Reused for all stats)
         $baseQuery = WasteEntry::forCampus($campusId)->inDateRange($days);
 
         // 3. Overall Waste Per Day (For the main chart)
@@ -61,6 +61,16 @@ class DashboardController
             ->get()
             ->keyBy('name');
 
+        // Bin Status Overview
+        $binStatus = Bin::whereHas('building', fn($q) => $q->where('campus_id', $campusId))
+            ->selectRaw("
+                COUNT(*) as total_bins,
+                SUM(CASE WHEN status < 11 THEN 1 ELSE 0 END) as empty_bins,
+                SUM(CASE WHEN status >= 11 AND status < 71 THEN 1 ELSE 0 END) as filled_bins,
+                SUM(CASE WHEN status >= 71 THEN 1 ELSE 0 END) as full_bins
+            ")
+            ->first();
+
         return [
             'dailyLabels'     => $dailyTotals->keys(),
             'dailyValues'     => $dailyTotals->values(),
@@ -68,6 +78,7 @@ class DashboardController
             'composition'     => $composition,
             'buildingTotals'  => $perBuilding,
             'buildingWaste'   => $perBuildingWaste,
+            'binStatus'       => $binStatus,
             'selectedCampus'  => $campusId,
             'selectedDays'    => $days,
             'campuses'        => Campus::all()

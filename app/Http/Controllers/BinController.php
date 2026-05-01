@@ -11,7 +11,7 @@ class BinController
   public function getBinStatus()
   {
       // Get all bins
-      $bins = Bin::all(['name', 'status', 'current_weight', 'waste_type']);
+      $bins = Bin::all(['name', 'status', 'current_weight', 'waste_type', 'capacity']);
 
       return response()->json($bins);
   }

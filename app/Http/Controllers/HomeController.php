@@ -42,10 +42,26 @@ class HomeController
 
             $data['campus'] = Campus::with('buildings')->find($campusId);
             
-            $data['wastes'] = WasteEntry::whereHas('building', function($q) use ($campusId) {
+            // Base query: waste entries for this campus
+            $query = WasteEntry::whereHas('building', function($q) use ($campusId) {
                     $q->where('campus_id', $campusId);
                 })
-                ->with('building')
+                ->with('building');
+
+            // Filter: building
+            if ($request->filled('building')) {
+                $query->where('building_id', $request->building);
+            }
+
+            // Filter: date range
+            if ($request->filled('date_from')) {
+                $query->where('date', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $query->where('date', '<=', $request->date_to);
+            }
+
+            $data['wastes'] = $query
                 ->orderBy('date', 'desc')
                 ->paginate($perPage)
                 ->withQueryString();
@@ -68,7 +84,7 @@ class HomeController
         elseif ($section === 'bin') {
 
             $campusId = request('campus', 1);
-            $buildingId = request('building'); // ✅ FIXED
+            $buildingId = request('building');
 
             if (!$campusId) {
                 $campusId = Campus::value('id');
@@ -82,7 +98,7 @@ class HomeController
                 if ($buildingId) {
                     $q->where('id', $buildingId);
                 }
-            })->get();
+            })->with(['building', 'wasteEntries'])->get();
 
             $data['selectedBuilding'] = $buildingId;
         }

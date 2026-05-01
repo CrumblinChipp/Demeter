@@ -1,22 +1,54 @@
 <div class="space-y-4">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold">Waste Records</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Waste Records</h1>
     </div>
 
-    <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-600">Building:</label>
-        <select id="buildingFilter"
-            class="bg-gray-50 text-gray-900 text-sm rounded-lg border border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 p-2">
-            
-            <option value="">All Buildings</option>
+    {{-- FILTER BAR --}}
+    <form method="GET" action="{{ route('homepage') }}" 
+          class="flex flex-wrap items-end gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <input type="hidden" name="section" value="data">
+        <input type="hidden" name="campus" value="{{ $selectedCampus }}">
 
-            @foreach ($campus->buildings as $b)
-                <option value="{{ $b->id }}">
-                    {{ $b->name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+        {{-- Building Filter --}}
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Building</label>
+            <select name="building"
+                class="bg-gray-50 text-gray-900 text-sm rounded-lg border border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 p-2 min-w-[160px]">
+                <option value="">All Buildings</option>
+                @foreach ($campus->buildings as $b)
+                    <option value="{{ $b->id }}" @selected(request('building') == $b->id)>
+                        {{ $b->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Date From --}}
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">From</label>
+            <input type="date" name="date_from" value="{{ request('date_from') }}"
+                class="bg-gray-50 text-gray-900 text-sm rounded-lg border border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 p-2">
+        </div>
+
+        {{-- Date To --}}
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">To</label>
+            <input type="date" name="date_to" value="{{ request('date_to') }}"
+                class="bg-gray-50 text-gray-900 text-sm rounded-lg border border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 p-2">
+        </div>
+
+        {{-- Action Buttons --}}
+        <div class="flex gap-2">
+            <button type="submit" 
+                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-all">
+                Apply
+            </button>
+            <a href="{{ route('homepage', ['section' => 'data', 'campus' => $selectedCampus]) }}" 
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-all">
+                Clear
+            </a>
+        </div>
+    </form>
 
     {{-- TABLE --}}
     <div class="overflow-x-auto bg-white shadow-sm border border-gray-200 rounded-lg">
@@ -35,14 +67,13 @@
             </thead>
 
             <tbody class="divide-y divide-gray-200">
-                @foreach ($wastes as $waste)
+                @forelse ($wastes as $waste)
 
                 @php
                     $totalWeight = $waste->residual_kg + $waste->recyclable_kg + 
                                 $waste->biodegradable_kg + $waste->infectious_kg;
                 @endphp
-                <tr class="waste-item hover:bg-gray-50 transition"
-                    data-building="{{ $waste->building_id }}">
+                <tr class="hover:bg-gray-50 transition">
                     <td class="p-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($waste->date)->format('M d, Y') }}</td>
                     <td class="p-4 font-medium">{{ $waste->building->name }}</td>
 
@@ -62,7 +93,11 @@
                         </form>
                     </td>
                 </tr>
-                @endforeach
+                @empty
+                <tr>
+                    <td colspan="8" class="p-8 text-center text-gray-400">No waste entries found.</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -87,52 +122,3 @@
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-    const buildingFilter = document.getElementById("buildingFilter");
-    const wastes = document.querySelectorAll(".waste-item");
-
-    function applyFilter(buildingId) {
-
-        wastes.forEach(waste => {
-            const wasteBuilding = waste.dataset.building;
-
-            if (!buildingId || wasteBuilding === buildingId) {
-                waste.style.display = "table-row";
-            } else {
-                waste.style.display = "none";
-            }
-        });
-    }
-
-    buildingFilter.addEventListener("change", () => {
-        const buildingId = buildingFilter.value;
-
-        // Apply filter
-        applyFilter(buildingId);
-
-        const url = new URL(window.location);
-        url.searchParams.set('section', 'data');
-
-        if (buildingId) {
-            url.searchParams.set('building', buildingId);
-        } else {
-            url.searchParams.delete('building');
-        }
-
-        window.history.pushState({}, '', url);
-    });
-
-    // 🔥 Load filter from URL (important for map → bin)
-    const params = new URLSearchParams(window.location.search);
-    const initialBuilding = params.get("building");
-
-    if (initialBuilding) {
-        buildingFilter.value = initialBuilding;
-        applyFilter(initialBuilding);
-    }
-
-});
-</script>

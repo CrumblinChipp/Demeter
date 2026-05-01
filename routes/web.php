@@ -44,3 +44,6 @@ Route::put('/buildings/{building}/coordinates', [BuildingController::class, 'upd
 Route::get('/api/campuses/{campus}/buildings', function ($campusId) {
     return \App\Models\Building::where('campus_id', $campusId)->get();
 });
+
+// Bin Collection — auto-creates waste entry when a bin is emptied
+Route::post('/api/bins/collect', [WasteEntryController::class, 'collect'])->name('bins.collect');

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\WasteEntry;
+use App\Models\Bin;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class WasteEntryController
 {
+    /**
+     * Manual waste entry (existing functionality)
+     */
     public function store(Request $request)
     {
         // 1. Validation
@@ -23,7 +26,6 @@ class WasteEntryController
         try {
             // 2. Create the Entry using Mass Assignment 
             $entry = WasteEntry::create([
-                'user_id'          => Auth::id(),
                 'date'             => now(),
                 'building_id'      => $validated['building_id'],
                 'biodegradable_kg' => $validated['biodegradable_kg'] ?? 0,
@@ -46,6 +48,79 @@ class WasteEntryController
             ], 500);
         }
     }
+
+    /**
+     * Bin Collection — called when a smart bin is emptied.
+     * 
+     * The bin's current_weight is recorded as a waste entry
+     * under the correct waste type column, then the bin is reset.
+     * 
+     * Expected payload: { "bin_id": 1 }
+     */
+    public function collect(Request $request)
+    {
+        $validated = $request->validate([
+            'bin_id' => 'required|exists:smart_bins,bin_id',
+        ]);
+
+        try {
+            $bin = Bin::with('building')->findOrFail($validated['bin_id']);
+
+            // Nothing to collect if bin is already empty
+            if ($bin->current_weight <= 0) {
+                return response()->json([
+                    'status' => 'info',
+                    'message' => 'Bin is already empty, nothing to collect.'
+                ], 200);
+            }
+
+            // Map the bin's waste_type to the correct column
+            $wasteColumn = match ($bin->waste_type) {
+                'Biodegradable' => 'biodegradable_kg',
+                'Recyclable'    => 'recyclable_kg',
+                'Residual'      => 'residual_kg',
+                'Infectious'    => 'infectious_kg',
+                default         => null,
+            };
+
+            if (!$wasteColumn) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unknown waste type: ' . $bin->waste_type
+                ], 400);
+            }
+
+            // Create waste entry with the weight under the correct type
+            $entry = WasteEntry::create([
+                'date'             => now(),
+                'building_id'      => $bin->building_id,
+                'biodegradable_kg' => 0,
+                'recyclable_kg'    => 0,
+                'residual_kg'      => 0,
+                'infectious_kg'    => 0,
+                $wasteColumn       => $bin->current_weight,
+            ]);
+
+            // Reset the bin
+            $bin->update([
+                'current_weight' => 0,
+                'status'         => 0,
+            ]);
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => "Collected {$bin->current_weight}kg of {$bin->waste_type} from {$bin->name}",
+                'entry'   => $entry,
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Collection failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function destroy(WasteEntry $waste)
     {
         $waste->delete();
