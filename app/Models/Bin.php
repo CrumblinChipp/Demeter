@@ -26,6 +26,18 @@ class Bin extends Model
         'installed_at' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Auto-calculate status from weight/capacity whenever bin is saved
+        static::saving(function ($bin) {
+            if ($bin->capacity > 0) {
+                $bin->status = min(100, round(($bin->current_weight / $bin->capacity) * 100));
+            }
+        });
+    }
+
     public function building()
     {
         return $this->belongsTo(Building::class);

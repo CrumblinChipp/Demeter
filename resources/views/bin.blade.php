@@ -50,13 +50,13 @@
              onclick="toggleBinDetail({{ $bin->bin_id }})">
             
             {{-- Header Row --}}
-            <div class="flex items-center justify-between mb-3">
-                <div>
-                    <h3 class="font-semibold text-gray-800">{{ $bin->name }}</h3>
-                    <p class="text-xs text-gray-500">{{ $bin->building->name ?? '—' }}</p>
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <div class="min-w-0 flex-1">
+                    <h3 class="font-semibold text-gray-800 truncate">{{ $bin->name }}</h3>
+                    <p class="text-xs text-gray-500 truncate">{{ $bin->building->name ?? '—' }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div class="relative w-10 h-10">
+                    <div class="relative w-12 h-12 flex-shrink-0">
                         <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
                             <path class="stroke-current text-gray-200"
                                 stroke-width="3.5" fill="none"
@@ -67,7 +67,7 @@
                                 stroke-linecap="round" fill="none"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                         </svg>
-                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold {{ $colorClass }}">
+                        <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold {{ $colorClass }}">
                             {{ $bin->status }}%
                         </span>
                     </div>
@@ -75,7 +75,7 @@
             </div>
 
             {{-- Stats Row --}}
-            <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="grid grid-cols-2 gap-2 text-center">
                 <div class="{{ $bgAccent }} rounded-lg p-2">
                     <div class="text-xs text-gray-500">Status</div>
                     <div class="text-sm font-semibold {{ $colorClass }} flex items-center justify-center gap-1">
@@ -86,10 +86,6 @@
                 <div class="bg-gray-50 rounded-lg p-2">
                     <div class="text-xs text-gray-500">Weight</div>
                     <div class="text-sm font-semibold text-gray-800">{{ number_format($bin->current_weight, 1) }} kg</div>
-                </div>
-                <div class="bg-gray-50 rounded-lg p-2">
-                    <div class="text-xs text-gray-500">Capacity</div>
-                    <div class="text-sm font-semibold text-gray-800">{{ number_format($bin->capacity, 1) }} kg</div>
                 </div>
             </div>
 

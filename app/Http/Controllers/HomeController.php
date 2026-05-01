@@ -104,6 +104,11 @@ class HomeController
         }
 
         elseif ($section === 'admin') {
+            // Block non-admin users from accessing admin section
+            if (!auth()->check() || !auth()->user()->is_admin) {
+                return redirect()->route('homepage', ['section' => 'dashboard']);
+            }
+
             // Default to 'add-campus' if no tab is specified
             $data['activeTab'] = $request->query('tab', 'add-campus');
             $data['campusToEdit'] = Campus::with('buildings')->find($campusId);

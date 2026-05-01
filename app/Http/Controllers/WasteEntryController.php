@@ -91,6 +91,8 @@ class WasteEntryController
             }
 
             // Create waste entry with the weight under the correct type
+            $collectedWeight = $bin->current_weight;
+
             $entry = WasteEntry::create([
                 'date'             => now(),
                 'building_id'      => $bin->building_id,
@@ -98,7 +100,7 @@ class WasteEntryController
                 'recyclable_kg'    => 0,
                 'residual_kg'      => 0,
                 'infectious_kg'    => 0,
-                $wasteColumn       => $bin->current_weight,
+                $wasteColumn       => $collectedWeight,
             ]);
 
             // Reset the bin
@@ -109,7 +111,7 @@ class WasteEntryController
 
             return response()->json([
                 'status'  => 'success',
-                'message' => "Collected {$bin->current_weight}kg of {$bin->waste_type} from {$bin->name}",
+                'message' => "Collected {$collectedWeight}kg of {$bin->waste_type} from {$bin->name}",
                 'entry'   => $entry,
             ], 201);
 
