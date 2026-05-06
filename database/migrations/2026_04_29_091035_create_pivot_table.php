@@ -7,7 +7,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('bin_pivot', function (Blueprint $table) {
+        Schema::create('pivot', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('waste_entry_id')
@@ -15,13 +15,14 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('bin_id')
-                ->constrained('smart_bins')
+                ->references('bin_id')
+                ->on('smart_bins')
                 ->cascadeOnDelete();
 
                 $table->float('weight');
 
             $table->date('entry_date');
-            
+
             $table->unique(['waste_entry_id', 'bin_id']);
         });
     }

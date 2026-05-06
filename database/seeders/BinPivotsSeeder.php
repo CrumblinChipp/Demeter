@@ -1,14 +1,16 @@
 <?php
+
+namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\WasteEntry;
 use App\Models\Bin;
 use Illuminate\Support\Facades\DB;
 
-class pivotSeeder extends Seeder
+class BinPivotsSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('bin_waste_entries')->truncate();
+        DB::table('pivot')->truncate();
 
         $entries = WasteEntry::all();
 
@@ -40,7 +42,7 @@ class pivotSeeder extends Seeder
                 
 
                 foreach ($binsGroup as $bin) {
-                    DB::table('bin_waste_entries')->insert([
+                    DB::table('pivot')->insert([
                         'waste_entry_id' => $entry->id,
                         'bin_id' => $bin->bin_id,
                         'weight' => $weightPerBin,
