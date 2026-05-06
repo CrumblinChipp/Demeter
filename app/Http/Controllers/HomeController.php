@@ -8,7 +8,7 @@ use App\Models\WasteEntry;
 use App\Models\Building;
 use App\Models\Bin;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\BinController;
+use App\Models\pivot;
 
 class HomeController
 {
@@ -82,7 +82,6 @@ class HomeController
         }
 
         elseif ($section === 'bin') {
-
             $campusId = request('campus', 1);
             $buildingId = request('building');
 
@@ -93,12 +92,16 @@ class HomeController
             $data['campus'] = Campus::with('buildings')->find($campusId);
 
             $data['smart_bins'] = Bin::whereHas('building', function ($q) use ($campusId, $buildingId) {
-                $q->where('campus_id', $campusId);
-
-                if ($buildingId) {
-                    $q->where('id', $buildingId);
-                }
-            })->with(['building', 'wasteEntries'])->get();
+                    $q->where('campus_id', $campusId);
+                    if ($buildingId) {
+                        $q->where('id', $buildingId);
+                    }
+                })
+                ->with(['building', 'wasteEntries' => function($query) {
+                    // Order by the date in your 'pivot' table
+                    $query->orderBy('pivot.entry_date', 'desc');
+                }])
+                ->get();
 
             $data['selectedBuilding'] = $buildingId;
         }

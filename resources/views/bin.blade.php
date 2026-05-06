@@ -104,13 +104,19 @@
             {{-- Expandable History (hidden by default) --}}
             <div id="bin-detail-{{ $bin->bin_id }}" class="hidden mt-3 pt-3 border-t border-gray-100">
                 <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Recent Weight History</h4>
+                
                 @if($bin->wasteEntries && $bin->wasteEntries->count())
                     <div class="space-y-1 max-h-32 overflow-y-auto">
-                        @foreach($bin->wasteEntries->sortByDesc('date')->take(10) as $entry)
-                        <div class="flex justify-between text-xs px-2 py-1 bg-gray-50 rounded">
-                            <span class="text-gray-600">{{ \Carbon\Carbon::parse($entry->date)->format('M d, Y') }}</span>
-                            <span class="font-medium text-gray-800">{{ number_format($entry->weight_kg, 2) }} kg</span>
-                        </div>
+                        {{-- We access the pivot data specifically --}}
+                        @foreach($bin->wasteEntries->take(10) as $entry)
+                            <div class="flex justify-between text-xs px-2 py-1 bg-gray-50 rounded">
+                                <span class="text-gray-600">
+                                    {{ \Carbon\Carbon::parse($entry->pivot->entry_date)->format('M d, Y') }}
+                                </span>
+                                <span class="font-medium text-gray-800">
+                                    {{ number_format($entry->pivot->weight, 2) }} kg
+                                </span>
+                            </div>
                         @endforeach
                     </div>
                 @else

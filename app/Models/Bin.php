@@ -42,14 +42,10 @@ class Bin extends Model
     {
         return $this->belongsTo(Building::class);
     }
-
-    /**
-     * Get waste entries for this bin's building.
-     * Since waste entries are per-building (not per-bin),
-     * this returns entries from the same building.
-     */
     public function wasteEntries()
     {
-        return $this->hasMany(WasteEntry::class, 'building_id', 'building_id');
+        return $this->belongsToMany(WasteEntry::class, 'pivot', 'bin_id', 'waste_entry_id')
+                    ->withPivot('weight', 'entry_date');
     }
+
 }
