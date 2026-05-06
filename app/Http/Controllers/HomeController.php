@@ -15,7 +15,6 @@ class HomeController
 
     public function index(Request $request)
     {
-        // Pick up the section from the URL, default to 'dashboard'
         $section = $request->query('section', 'dashboard');
 
         $campusId = $request->input('campus', 1);
@@ -66,6 +65,7 @@ class HomeController
                 ->paginate($perPage)
                 ->withQueryString();
         }
+        
         elseif ($section === 'map') {
             $data['campus'] = Campus::with([
                 'buildings' => function($query) {

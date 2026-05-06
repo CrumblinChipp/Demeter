@@ -1,27 +1,33 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('pivot', function (Blueprint $table) {
+        Schema::create('bin_pivot', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+
+            $table->foreignId('waste_entry_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('bin_id')
+                ->constrained('smart_bins')
+                ->cascadeOnDelete();
+
+                $table->float('weight');
+
+            $table->date('entry_date');
+            
+            $table->unique(['waste_entry_id', 'bin_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('pivot');
+        Schema::dropIfExists('bin_waste_entries');
     }
 };

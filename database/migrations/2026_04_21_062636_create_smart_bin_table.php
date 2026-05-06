@@ -20,12 +20,15 @@ return new class extends Migration
 
             $table->string('name');
 
+            $table->string('waste_type');
+
+            $table->float('capacity')->default(0)->after('current_weight');
+
             $table->integer('status')->default('0');
 
             $table->float('current_weight')->default(0.0);
 
-            $table->timestamps();
-        });
+            $table->timestamp('installed_at')->nullable()->after('capacity');        });
     }
 
     /**

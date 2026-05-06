@@ -3,7 +3,7 @@
 </div>
 <div class="flex flex-col lg:flex-row gap-6">
     {{-- Left Side: The Interactive Map --}}
-    <div class="lg: relative bg-gray-200 rounded-xl shadow-inner overflow-hidden border-4 border-white">
+    <div class="lg:relative bg-gray-200 rounded-xl shadow-inner overflow-hidden border-4 border-white">
         @if($campus && $campus->map)
             <div class="relative inline-block w-full">
                 <img src="{{ asset('storage/' . $campus->map) }}" 

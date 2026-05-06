@@ -46,7 +46,7 @@
         <nav class="flex md:flex-col md:flex-1 md:px-3 md:space-y-1">
 
             {{-- Dashboard --}}
-            <a href="{{ route('homepage', ['section' => 'dashboard']) }}" data-nav="dashboard"
+            <a href="{{ route('homepage', ['section' => 'dashboard', 'campus' => $selectedCampus]) }}" data-nav="dashboard"
                 class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
                 {{ $currentSection == 'dashboard' ? 'bg-white/15 text-white' : 'text-emerald-100/70 hover:bg-white/10 hover:text-white' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
@@ -56,7 +56,7 @@
             </a>
 
             {{-- Map --}}
-            <a href="{{ route('homepage', ['section' => 'map']) }}" data-nav="maps"
+            <a href="{{ route('homepage', ['section' => 'map', 'campus' => $selectedCampus]) }}" data-nav="maps"
                 class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
                 {{ $currentSection == 'map' ? 'bg-white/15 text-white' : 'text-emerald-100/70 hover:bg-white/10 hover:text-white' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
@@ -66,7 +66,7 @@
             </a>
 
             {{-- Bins --}}
-            <a href="{{ route('homepage', ['section' => 'bin']) }}" data-nav="bin"
+            <a href="{{ route('homepage', ['section' => 'bin', 'campus' => $selectedCampus]) }}" data-nav="bin"
                 class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
                 {{ $currentSection == 'bin' ? 'bg-white/15 text-white' : 'text-emerald-100/70 hover:bg-white/10 hover:text-white' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
@@ -76,7 +76,7 @@
             </a>
 
             {{-- Data --}}
-            <a href="{{ route('homepage', ['section' => 'data']) }}" data-nav="data"
+            <a href="{{ route('homepage', ['section' => 'data', 'campus' => $selectedCampus]) }}" data-nav="data"
                 class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
                 {{ $currentSection == 'data' ? 'bg-white/15 text-white' : 'text-emerald-100/70 hover:bg-white/10 hover:text-white' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
@@ -88,7 +88,7 @@
             {{-- Admin Settings (only visible to admins) --}}
             @auth
             @if(auth()->user()->is_admin)
-            <a href="{{ route('homepage', ['section' => 'admin']) }}" data-nav="admin"
+            <a href="{{ route('homepage', ['section' => 'admin', 'campus' => $selectedCampus]) }}" data-nav="admin"
                 class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
                 {{ $currentSection == 'admin' ? 'bg-white/15 text-white' : 'text-emerald-100/70 hover:bg-white/10 hover:text-white' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">

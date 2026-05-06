@@ -17,9 +17,6 @@ return new class extends Migration
             // Building where waste was collected
             $table->foreignId('building_id')->constrained()->onDelete('cascade');
 
-            // User who submitted the entry
-            $table->unsignedBigInteger('user_id');
-
             // Waste amounts (kg)
             $table->integer('residual_kg')->default(0);
             $table->integer('recyclable_kg')->default(0);

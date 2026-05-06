@@ -40,8 +40,8 @@ class BinSeeder extends Seeder
                     'waste_type'     => $type,
                     'status'         => $percentage,
                     'current_weight' => $calculatedWeight,
-                    'created_at'     => now(),
-                    'updated_at'     => now(),
+                    'capacity'       => $maxCapacity,
+                    'installed_at'     => now(),
                 ]);
             }
         }
