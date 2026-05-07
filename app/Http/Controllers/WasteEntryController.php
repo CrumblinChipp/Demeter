@@ -8,55 +8,6 @@ use Illuminate\Http\Request;
 
 class WasteEntryController
 {
-    /**
-     * Manual waste entry (existing functionality)
-     */
-    public function store(Request $request)
-    {
-        // 1. Validation
-        $validated = $request->validate([
-            'campus_id'        => 'required|exists:campuses,id',
-            'building_id'      => 'required|exists:buildings,id',
-            'biodegradable_kg' => 'nullable|numeric|min:0',
-            'recyclable_kg'    => 'nullable|numeric|min:0',
-            'residual_kg'      => 'nullable|numeric|min:0',
-            'infectious_kg'    => 'nullable|numeric|min:0',
-        ]);
-
-        try {
-            // 2. Create the Entry using Mass Assignment 
-            $entry = WasteEntry::create([
-                'date'             => now(),
-                'building_id'      => $validated['building_id'],
-                'biodegradable_kg' => $validated['biodegradable_kg'] ?? 0,
-                'recyclable_kg'    => $validated['recyclable_kg'] ?? 0,
-                'residual_kg'      => $validated['residual_kg'] ?? 0,
-                'infectious_kg'    => $validated['infectious_kg'] ?? 0,
-            ]);
-
-            // 3. Return Response for AJAX
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Waste entry recorded successfully!',
-                'data' => $entry
-            ], 201);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Something went wrong: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Bin Collection — called when a smart bin is emptied.
-     * 
-     * The bin's current_weight is recorded as a waste entry
-     * under the correct waste type column, then the bin is reset.
-     * 
-     * Expected payload: { "bin_id": 1 }
-     */
     public function collect(Request $request)
     {
         $validated = $request->validate([

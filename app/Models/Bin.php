@@ -21,6 +21,7 @@ class Bin extends Model
         'current_weight',
         'capacity',
         'installed_at',
+        'is_registered',
     ];
 
     protected $casts = [

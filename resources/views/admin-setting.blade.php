@@ -28,7 +28,7 @@
             <li class="mr-2">
                 <a href="{{ route('homepage', ['section' => 'admin', 'tab' => 'add-bin']) }}" 
                     class="inline-block p-4 rounded-t-lg border-b-2 {{ $activeTab == 'add-bin' ? 'text-emerald-600 border-emerald-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300' }}">
-                    Register Bin
+                    Add Bin
                 </a>
             </li>
         </ul>

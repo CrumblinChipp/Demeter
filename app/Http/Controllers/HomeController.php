@@ -112,10 +112,9 @@ class HomeController
                 return redirect()->route('homepage', ['section' => 'dashboard']);
             }
 
-            // Default to 'add-campus' if no tab is specified
             $data['activeTab'] = $request->query('tab', 'add-campus');
+            $data['binTab'] = $request->query('bin', 'unmatched');
             $data['campusToEdit'] = Campus::with('buildings')->find($campusId);
-            // If your edit-campus or edit-map needs specific data (like a list of campuses), fetch it here:
             $data['allCampuses'] = Campus::all();
 
             $data['buildings'] = Building::where('campus_id', $campusId)->get();
@@ -124,6 +123,28 @@ class HomeController
             if (!$data['campusToEdit']) {
                 $data['campusToEdit'] = Campus::with('buildings')->first();
             }
+            //For Bin Stuff
+            $campusId = request('campus', 1);
+            $buildingId = request('building');
+
+            if (!$campusId) {
+                $campusId = Campus::value('id');
+            }
+
+            $data['campus'] = Campus::with('buildings')->find($campusId);
+
+            $data['smart_bins'] = Bin::whereHas('building', function ($q) use ($campusId, $buildingId) {
+                    $q->where('campus_id', $campusId);
+                    if ($buildingId) {
+                        $q->where('id', $buildingId);
+                    }
+                })
+                ->with(['building', 'wasteEntries' => function($query) {
+                    // Order by the date in your 'pivot' table
+                    $query->orderBy('pivot.entry_date', 'desc');
+                }])
+                ->get();
+
         }
 
         return view('homepage', $data);
