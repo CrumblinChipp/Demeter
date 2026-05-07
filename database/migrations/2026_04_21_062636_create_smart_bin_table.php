@@ -28,7 +28,14 @@ return new class extends Migration
 
             $table->float('current_weight')->default(0.0);
 
-            $table->timestamp('installed_at')->nullable()->after('capacity');        });
+            $table->string('device_key')->unique();
+
+            $table->timestamp('installed_at')->nullable()->after('capacity');
+
+            $table->bollean('is_registered')->default(false);
+
+
+         });
     }
 
     /**

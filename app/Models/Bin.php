@@ -16,6 +16,7 @@ class Bin extends Model
         'building_id',
         'name',
         'waste_type',
+        'device_key',
         'status',
         'current_weight',
         'capacity',

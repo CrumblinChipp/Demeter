@@ -25,6 +25,12 @@
                     Edit Map Marker
                 </a>
             </li>
+            <li class="mr-2">
+                <a href="{{ route('homepage', ['section' => 'admin', 'tab' => 'add-bin']) }}" 
+                    class="inline-block p-4 rounded-t-lg border-b-2 {{ $activeTab == 'add-bin' ? 'text-emerald-600 border-emerald-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300' }}">
+                    Register Bin
+                </a>
+            </li>
         </ul>
     </div>
 
@@ -36,6 +42,8 @@
             @include('admin.edit-campus')
         @elseif($activeTab == 'edit-building')
             @include('admin.edit-map')
+        @elseif($activeTab == 'add-bin')
+            @include('admin.add-bin')
         @endif
     </div>
 </div>
