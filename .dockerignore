@@ -1,0 +1,16 @@
+# Testing
+test_ai.php
+test_bin_final.php
+test_gemini.php
+
+# Development
+node_modules
+.env
+.env.backup
+.env.production
+.git
+.github
+tests
+phpunit.xml
+.styleci.yml
+.editorconfig

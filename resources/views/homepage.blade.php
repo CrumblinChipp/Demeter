@@ -288,9 +288,21 @@
         wrapper.className = isUser ? 'flex gap-2 justify-end' : 'flex gap-2';
 
         if (isUser) {
-            wrapper.innerHTML = `<div class="bg-emerald-600 text-white text-sm px-3 py-2 rounded-xl rounded-tr-none max-w-[80%]">${content}</div>`;
+            const bubble = document.createElement('div');
+            bubble.className = 'bg-emerald-600 text-white text-sm px-3 py-2 rounded-xl rounded-tr-none max-w-[80%]';
+            bubble.textContent = content;
+            wrapper.appendChild(bubble);
         } else {
-            wrapper.innerHTML = `<div class="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold shrink-0">D</div><div class="bg-gray-100 text-gray-700 text-sm px-3 py-2 rounded-xl rounded-tl-none max-w-[80%] whitespace-pre-line">${content}</div>`;
+            const icon = document.createElement('div');
+            icon.className = 'w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold shrink-0';
+            icon.textContent = 'D';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bg-gray-100 text-gray-700 text-sm px-3 py-2 rounded-xl rounded-tl-none max-w-[80%] whitespace-pre-line';
+            bubble.textContent = content;
+
+            wrapper.appendChild(icon);
+            wrapper.appendChild(bubble);
         }
 
         container.appendChild(wrapper);
@@ -336,6 +348,14 @@
             });
 
             console.log('AI response status:', res.status);
+
+            if (res.status === 429) {
+                typing.remove();
+                addChatMessage('You are sending messages too fast! Please wait a minute and try again.');
+                btn.disabled = false;
+                btn.textContent = 'Send';
+                return;
+            }
 
             const data = await res.json();
             typing.remove();

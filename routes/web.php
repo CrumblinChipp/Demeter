@@ -9,6 +9,7 @@ use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\BinController;
 
 
+// ── Public Routes ──────────────────────────────────────────
 Route::get('/', function () {
     return view('welcome');
 });
@@ -16,45 +17,38 @@ Route::get('/', function () {
 Route::view('/welcome','welcome');
 Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
-
 Route::post('/register', [AuthController::class, 'register'])->name('register');
-
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 
-Route::delete('/waste/{waste}', [WasteEntryController::class, 'destroy'])->name('waste.destroy');
+// ── Authenticated Routes ───────────────────────────────────
+Route::middleware('auth')->group(function () {
 
-Route::post('/waste/store', [WasteEntryController::class, 'store'])->name('waste.store');
+    Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+    Route::delete('/waste/{waste}', [WasteEntryController::class, 'destroy'])->name('waste.destroy');
 
-    // Update Campus (Handles the name, map upload, and buildings)
-    Route::put('/campus/{campus}', [CampusController::class, 'update'])->name('campus.update');
-    
-    // Delete Campus
-    Route::delete('/campus/{campus}', [CampusController::class, 'destroy'])->name('campus.destroy');
+    Route::put('/buildings/{building}/coordinates', [BuildingController::class, 'updateCoordinates'])
+        ->name('buildings.coordinates.update');
 
-    // Add Campus
-    Route::post('/campus', [CampusController::class, 'store'])->name('campus.store');
+    Route::get('/api/campuses/{campus}/buildings', function ($campusId) {
+        return \App\Models\Building::where('campus_id', $campusId)->get();
+    });
 
-    // Bin: create new bin from scratch
-    Route::post('/bins/register', [BinController::class, 'storeBin'])->name('bins.register');
+    // Admin-only routes
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::put('/campus/{campus}', [CampusController::class, 'update'])->name('campus.update');
+        Route::delete('/campus/{campus}', [CampusController::class, 'destroy'])->name('campus.destroy');
+        Route::post('/campus', [CampusController::class, 'store'])->name('campus.store');
+        Route::post('/bins/register', [BinController::class, 'storeBin'])->name('bins.register');
+        Route::put('/bins/update', [BinController::class, 'updateBin'])->name('bins.update');
+    });
 
-    // Bin: register existing unmatched bin (set is_registered = true)
-    Route::put('/bins/update', [BinController::class, 'updateBin'])->name('bins.update');
-
+    // AI Chat — rate limited to 20 requests per minute per user
+    Route::post('/api/ai/ask', [\App\Http\Controllers\AiController::class, 'ask'])
+        ->middleware('throttle:20,1')
+        ->name('ai.ask');
 });
 
-Route::put('/buildings/{building}/coordinates', [BuildingController::class, 'updateCoordinates'])
-    ->name('buildings.coordinates.update');
-
-Route::get('/api/campuses/{campus}/buildings', function ($campusId) {
-    return \App\Models\Building::where('campus_id', $campusId)->get();
-});
-
-// Bin Collection — auto-creates waste entry when a bin is emptied
+// Bin Collection API — IoT device endpoint (no auth, device-key based)
 Route::post('/api/bins/collect', [WasteEntryController::class, 'collect'])->name('bins.collect');
-
-// AI Chat — Gemini-powered Q&A about waste data
-Route::post('/api/ai/ask', [\App\Http\Controllers\AiController::class, 'ask'])->name('ai.ask');

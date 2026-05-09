@@ -11,10 +11,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust Railway's reverse proxy for proper HTTPS URL generation
+        $middleware->trustProxies(at: '*');
+
+        // Exempt API routes from CSRF verification
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
+
+        // Apply security headers to every response
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
+
