@@ -2,26 +2,18 @@ FROM php:8.4-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libpq-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    nodejs \
-    npm \
+    git curl libpng-dev libonig-dev libxml2-dev \
+    libpq-dev libzip-dev zip unzip nodejs npm \
     && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Fix Apache MPM conflict: disable event, enable prefork (required for mod_php)
-RUN a2dismod mpm_event && a2enmod mpm_prefork && a2enmod rewrite
+# Fix Apache MPM conflict: forcefully remove event/worker, keep only prefork
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.load /etc/apache2/mods-enabled/mpm_event.conf \
+    && rm -f /etc/apache2/mods-enabled/mpm_worker.load /etc/apache2/mods-enabled/mpm_worker.conf \
+    && a2enmod mpm_prefork rewrite
 
 # Set Apache document root to Laravel's public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
@@ -53,25 +45,15 @@ RUN mkdir -p storage/logs \
     && chmod -R 775 storage bootstrap/cache
 
 # OPcache configuration for performance
-RUN echo "opcache.enable=1\n\
-opcache.memory_consumption=128\n\
-opcache.interned_strings_buffer=8\n\
-opcache.max_accelerated_files=4000\n\
-opcache.validate_timestamps=0\n\
-opcache.save_comments=1\n\
-opcache.fast_shutdown=1" > /usr/local/etc/php/conf.d/opcache.ini
+RUN echo "opcache.enable=1\nopcache.memory_consumption=128\nopcache.max_accelerated_files=4000\nopcache.validate_timestamps=0" > /usr/local/etc/php/conf.d/opcache.ini
 
 # Use Railway's PORT environment variable
 RUN sed -i 's/Listen 80/Listen ${PORT}/' /etc/apache2/ports.conf \
     && sed -i 's/:80/:${PORT}/' /etc/apache2/sites-available/000-default.conf
 
-# Laravel production optimizations (run at startup via entrypoint)
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-# Convert line endings from Windows CRLF to Unix LF
-RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh
-
-EXPOSE ${PORT}
+# Write the entrypoint inline (avoids Windows CRLF issues entirely)
+RUN printf '#!/bin/bash\nset -e\nphp artisan config:cache\nphp artisan route:cache\nphp artisan view:cache\nphp artisan migrate --force\nphp artisan storage:link 2>/dev/null || true\nexec "$@"\n' > /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
