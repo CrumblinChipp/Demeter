@@ -14,6 +14,7 @@ class User extends Authenticatable
         'name',
         'sr_code',
         'email',
+        'campus_id',
         'password',
         'is_admin',
     ];

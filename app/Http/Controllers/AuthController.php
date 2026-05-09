@@ -7,13 +7,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Campus;
 
 class AuthController
 {
-    // Show the page
-    public function index()
+
+    public function index(Request $request)
     {
-        return view('login');
+        // 1. Fetch all campuses from the database
+        $campuses = Campus::orderBy('name', 'asc')->get();
+
+        // 2. Grab the 'campus' ID from the URL (e.g., /login?campus=1)
+        // If it's not there, default to null
+        $selectedCampus = $request->query('campus');
+
+        // 3. Pass both variables to the view
+        return view('login', [
+            'campuses' => $campuses,
+            'selectedCampus' => $selectedCampus
+        ]);
     }
 
     // Handle Login
@@ -40,6 +52,7 @@ class AuthController
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'campus_id' => 'required|exists:campuses,id',
             'sr_code' => 'required|string|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
@@ -54,6 +67,7 @@ class AuthController
     $user = User::create([
             'name' => $request->name,
             'sr_code' => $request->sr_code,
+            'campus_id' => $request->campus_id,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);

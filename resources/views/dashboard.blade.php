@@ -7,7 +7,8 @@
 <div class="mb-6 flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
     
     <form id="globalFilterForm" method="GET" action="{{ route('homepage') }}" class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
-        
+        @auth
+        @if(auth()->user()->is_admin)
         {{-- Campus Select --}}
         <div class="flex items-center gap-2">
             <label class="text-sm font-medium text-gray-600">Campus:</label>
@@ -20,7 +21,8 @@
                 @endforeach
             </select>
         </div>
-
+        @endif
+        @endauth
         {{-- Time Range Select --}}
         <div class="flex items-center gap-2">
             <label class="text-sm font-medium text-gray-600">Period:</label>
