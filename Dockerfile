@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Fix Apache MPM conflict: disable event, enable prefork (required for mod_php)
+RUN a2dismod mpm_event && a2enmod mpm_prefork && a2enmod rewrite
 
 # Set Apache document root to Laravel's public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
@@ -68,6 +68,8 @@ RUN sed -i 's/Listen 80/Listen ${PORT}/' /etc/apache2/ports.conf \
 # Laravel production optimizations (run at startup via entrypoint)
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Convert line endings from Windows CRLF to Unix LF
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE ${PORT}
 

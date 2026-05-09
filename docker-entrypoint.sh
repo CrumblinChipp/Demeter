@@ -10,7 +10,8 @@ php artisan view:cache
 php artisan migrate --force
 
 # Create storage symlink for file uploads (campus maps)
-php artisan storage:link --force 2>/dev/null || true
+# Suppress error if link already exists
+php artisan storage:link 2>/dev/null || true
 
 # Start Apache
 exec "$@"
