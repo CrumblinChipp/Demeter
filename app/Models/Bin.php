@@ -12,6 +12,7 @@ class Bin extends Model
     protected $table = 'smart_bins';
     protected $primaryKey = 'bin_id';
 
+    public $timestamps = false;
     protected $fillable = [
         'building_id',
         'name',

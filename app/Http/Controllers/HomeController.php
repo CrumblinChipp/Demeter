@@ -126,6 +126,11 @@ class HomeController
             //For Bin Stuff
             $campusId = request('campus', 1);
             $buildingId = request('building');
+            $lastBin = Bin::latest('bin_id')->first();
+
+            $data['nextBinId'] = $lastBin
+                ? $lastBin->bin_id + 1
+                : 1;
 
             if (!$campusId) {
                 $campusId = Campus::value('id');

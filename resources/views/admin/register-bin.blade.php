@@ -1,23 +1,22 @@
-# Bin Registration UI (Button-Based Flow)
 
-```blade
 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 
     <h2 class="text-2xl font-bold text-gray-800 mb-6">
         Register Bin
     </h2>
 
-    <form action="{{ route('bins.register') }}" method="POST">
+    <form action="{{ route('admin.bins.register') }}" method="POST">
         @csrf
 
-        {{-- DEVICE KEY --}}
+        {{-- DEVICE KEY PREVIEW --}}
         <div class="mb-8">
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-                Device Key
+                Generated Device Key
             </label>
 
-            <div class="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-700 font-medium">
-                {{ $selectedBin->device_key ?? 'No Device Selected' }}
+            <div id="device-key-preview"
+                class="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-700 font-semibold tracking-wide">
+                BIN-XXX-XXX-000
             </div>
         </div>
 
@@ -120,14 +119,69 @@
         {{-- CONFIRM BUTTON --}}
         <div class="pt-4 border-t border-gray-100">
             <button
-                type="submit"
+                type="button"
+                id="open-confirm-modal"
                 class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition-all"
             >
                 Confirm Registration
             </button>
         </div>
 
+        <input type="hidden" name="device_key" id="deviceKeyInput">
     </form>
+</div>
+
+{{-- CONFIRMATION MODAL --}}
+<div id="confirm-modal"
+    class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+            Confirm Bin Registration
+        </h2>
+
+        <div class="space-y-3 text-sm">
+
+            <div class="flex justify-between">
+                <span class="text-gray-500">Device Key</span>
+                <span id="confirm-device-key" class="font-semibold text-gray-800"></span>
+            </div>
+
+            <div class="flex justify-between">
+                <span class="text-gray-500">Building</span>
+                <span id="confirm-building" class="font-semibold text-gray-800"></span>
+            </div>
+
+            <div class="flex justify-between">
+                <span class="text-gray-500">Waste Type</span>
+                <span id="confirm-type" class="font-semibold text-gray-800"></span>
+            </div>
+
+            <div class="flex justify-between">
+                <span class="text-gray-500">Capacity</span>
+                <span id="confirm-capacity" class="font-semibold text-gray-800"></span>
+            </div>
+
+        </div>
+
+        <div class="mt-6 flex gap-3">
+
+            <button type="button"
+                id="cancel-modal"
+                class="flex-1 border border-gray-300 rounded-lg py-3 hover:bg-gray-50">
+                Cancel
+            </button>
+
+            <button type="button"
+                id="final-confirm"
+                class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-3">
+                Confirm
+            </button>
+
+        </div>
+
+    </div>
 </div>
 
 
@@ -207,22 +261,119 @@
         });
     });
 
+    const deviceKeyPreview = document.getElementById('device-key-preview');
+    const deviceKeyInput = document.getElementById('deviceKeyInput');
+
+    let selectedBuildingName = '';
+    let selectedWasteCode = '';
+
+    // BUILDING SELECTION
+    buildingButtons.forEach(button => {
+
+        button.addEventListener('click', () => {
+
+            selectedBuildingName = button.textContent.trim();
+
+            const buildingCode = selectedBuildingName
+                .substring(0, 3)
+                .toUpperCase();
+
+            const wasteType = selectedWasteType.value;
+
+            let wasteCode = 'UNK';
+
+            if (wasteType === 'biodegradable') wasteCode = 'BIO';
+            if (wasteType === 'recyclable') wasteCode = 'REC';
+            if (wasteType === 'residual') wasteCode = 'RES';
+            if (wasteType === 'infectious') wasteCode = 'INF';
+
+            selectedWasteCode = wasteCode;
+
+            generateDeviceKey(buildingCode, wasteCode);
+        });
+    });
+
+
+    // WASTE TYPE SELECTION
+    wasteButtons.forEach(button => {
+
+        button.addEventListener('click', () => {
+
+            const type = button.dataset.type;
+
+            let wasteCode = 'UNK';
+
+            if (type === 'biodegradable') wasteCode = 'BIO';
+            if (type === 'recyclable') wasteCode = 'REC';
+            if (type === 'residual') wasteCode = 'RES';
+            if (type === 'infectious') wasteCode = 'INF';
+
+            selectedWasteCode = wasteCode;
+
+            const buildingBtn = document.querySelector('.building-btn.border-blue-600');
+
+            if (buildingBtn) {
+
+                const buildingCode = buildingBtn.textContent
+                    .trim()
+                    .substring(0, 3)
+                    .toUpperCase();
+
+                generateDeviceKey(buildingCode, wasteCode);
+            }
+        });
+    });
+
+
+    function generateDeviceKey(buildingCode, wasteCode)
+    {
+        // Get next expected bin ID
+        const nextBinId = "{{ str_pad($nextBinId, 3, '0', STR_PAD_LEFT) }}";
+
+        const deviceKey = `BIN-${buildingCode}-${wasteCode}-${nextBinId}`;
+
+        deviceKeyPreview.textContent = deviceKey;
+
+        deviceKeyInput.value = deviceKey;
+    }
+
+
+    // MODAL LOGIC
+    const openModalBtn = document.getElementById('open-confirm-modal');
+    const modal = document.getElementById('confirm-modal');
+
+    const cancelModalBtn = document.getElementById('cancel-modal');
+    const finalConfirmBtn = document.getElementById('final-confirm');
+
+    openModalBtn.addEventListener('click', () => {
+
+        document.getElementById('confirm-device-key').textContent =
+            deviceKeyInput.value;
+
+        document.getElementById('confirm-building').textContent =
+            document.querySelector('.building-btn.border-blue-600')?.textContent.trim() || '-';
+
+        document.getElementById('confirm-type').textContent =
+            selectedWasteType.value || '-';
+
+        document.getElementById('confirm-capacity').textContent =
+            document.querySelector('input[name=\"capacity\"]').value + ' KG';
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    });
+
+
+    cancelModalBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    });
+
+
+    const registerForm = document.querySelector('form[action="{{ route('admin.bins.register') }}"]');
+
+    finalConfirmBtn.addEventListener('click', () => {
+        registerForm.submit();
+    });
+
 </script>
-```
-
----
-
-# Suggested Backend Logic
-
-Inside your controller:
-
-```php
-Bin::where('bin_id', $binId)->update([
-    'building_id' => $request->building_id,
-    'waste_type' => $request->waste_type,
-    'capacity' => $request->capacity,
-    'is_registered' => true,
-]);
-```
-
-This keeps the same hardware/device record while officially registering it into the system.

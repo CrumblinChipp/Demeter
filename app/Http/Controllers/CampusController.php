@@ -76,7 +76,6 @@ class CampusController
             'campus' => $campus->id
         ])->with('success', 'Campus updated successfully!');
     }
-
     public function store(Request $request)
     {
         $request->validate([

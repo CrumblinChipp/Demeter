@@ -6,7 +6,7 @@
                 {{-- Header --}}
                 <div class="mb-4">
                     <h3 class="font-semibold text-gray-800 truncate">
-                         Device Key: {{-- $bin->device_key --}}
+                         Device Key: {{ $bin->device_key}}
                     </h3>
 
                     <p class="text-xs text-gray-500 mt-1">

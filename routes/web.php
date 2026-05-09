@@ -6,6 +6,7 @@ use App\Http\Controllers\WasteEntryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CampusController;
 use App\Http\Controllers\BuildingController;
+use App\Http\Controllers\BinController;
 
 
 Route::get('/', function () {
@@ -36,6 +37,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Add Campus
     Route::post('/campus', [CampusController::class, 'store'])->name('campus.store');
+
+    Route::post('/bins/register', [BinController::class, 'storeBin'])->name('bins.register');
+
 });
 
 Route::put('/buildings/{building}/coordinates', [BuildingController::class, 'updateCoordinates'])
