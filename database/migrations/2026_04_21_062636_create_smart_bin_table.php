@@ -32,9 +32,9 @@ return new class extends Migration
 
             $table->timestamp('installed_at')->nullable()->after('capacity');
 
-            $table->bollean('is_registered')->default(false);
+            $table->boolean('is_registered')->default(false);
 
-            $table->bollean('is_detected')->default(false);
+            $table->boolean('is_detected')->default(false);
 
 
          });
