@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>ARTHEMIS - Waste Management Solution</title>
+    <title>DEMETER - Waste Management Solution</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -38,10 +38,7 @@
         .animate-fadeInUp-1_2s { animation: fadeInUp 1.2s ease; }
         .animate-bounce-2s { animation: bounce 2s infinite; }
 
-        .logo::before {
-            content: '🌿';
-            font-size: 28px;
-        }
+
 
         .nav-link-underline::after {
             content: '';
@@ -67,7 +64,7 @@
     <div class="cloud cloud-4 hidden md:block absolute bg-white rounded-full opacity-90 z-20 w-[200px] h-[85px] bottom-40 right-40 animate-float-11s"></div>
 
     <nav id="navbar" class="fixed top-0 left-0 right-0 flex justify-between items-center px-6 md:px-16 py-5 bg-black/30 backdrop-blur-md z-[1000] transition-all duration-300">
-        <a  class="logo flex items-center gap-3 text-white text-xl md:text-2xl font-bold tracking-widest no-underline">ARTHEMIS</a>
+        <a  class="logo flex items-center gap-3 text-white text-xl md:text-2xl font-bold tracking-widest no-underline">DEMETER</a>
         
         <div class="md:hidden flex flex-col gap-1.5 p-2 cursor-pointer" onclick="toggleMenu()">
             <span class="w-7 h-0.5 bg-white rounded-full transition-all duration-300"></span>
@@ -96,9 +93,6 @@
                     Redefining Waste for a<br>
                     <span class="text-emerald-400">Cleaner, Greener Tomorrow!</span>
                 </h1>
-                
-                
-                </a>
             </div>
         </div>
         <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce-2s">
@@ -108,7 +102,7 @@
 
     <section class="py-20 md:py-28 bg-white" id="features">
         <div class="max-w-7xl mx-auto px-6 md:px-16">
-            <h2 class="text-center text-4xl md:text-5xl font-extrabold text-gray-800 mb-16">Why Choose ARTHEMIS?</h2>
+            <h2 class="text-center text-4xl md:text-5xl font-extrabold text-gray-800 mb-16">Why Choose DEMETER?</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
                 
                 <div class="p-8 bg-blue-50/70 rounded-2xl text-center transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-emerald-200/50">

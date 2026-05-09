@@ -25,36 +25,11 @@ class WasteEntryController
                 ], 200);
             }
 
-            // Map the bin's waste_type to the correct column
-            $wasteColumn = match ($bin->waste_type) {
-                'Biodegradable' => 'biodegradable_kg',
-                'Recyclable'    => 'recyclable_kg',
-                'Residual'      => 'residual_kg',
-                'Infectious'    => 'infectious_kg',
-                default         => null,
-            };
-
-            if (!$wasteColumn) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Unknown waste type: ' . $bin->waste_type
-                ], 400);
-            }
-
-            // Create waste entry with the weight under the correct type
             $collectedWeight = $bin->current_weight;
 
-            $entry = WasteEntry::create([
-                'date'             => now(),
-                'building_id'      => $bin->building_id,
-                'biodegradable_kg' => 0,
-                'recyclable_kg'    => 0,
-                'residual_kg'      => 0,
-                'infectious_kg'    => 0,
-                $wasteColumn       => $collectedWeight,
-            ]);
-
-            // Reset the bin
+            // Simply reset the bin.
+            // The Bin model's 'updating' event will automatically detect this
+            // drop to 0kg and create the WasteEntry record for us.
             $bin->update([
                 'current_weight' => 0,
                 'status'         => 0,
@@ -62,8 +37,7 @@ class WasteEntryController
 
             return response()->json([
                 'status'  => 'success',
-                'message' => "Collected {$collectedWeight}kg of {$bin->waste_type} from {$bin->name}",
-                'entry'   => $entry,
+                'message' => "Collected {$collectedWeight}kg of {$bin->waste_type} from {$bin->name} (Auto-recorded)",
             ], 201);
 
         } catch (\Exception $e) {

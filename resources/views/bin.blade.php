@@ -3,48 +3,63 @@
         <h1 class="text-3xl font-bold text-gray-800">Smart Bins</h1>
     </div>
 
-    {{-- FILTER --}}
-    <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-600">Building:</label>
-        <select id="buildingFilter"
-            class="bg-gray-50 text-gray-900 text-sm rounded-lg border border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 p-2">
-            
-            <option value="">All Buildings</option>
+    {{-- FILTERS --}}
+    <div class="flex flex-wrap items-center gap-4">
+        {{-- Campus Filter --}}
+        <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-600">Campus:</label>
+            <select onchange="window.location.href='{{ route('homepage') }}?section=bin&campus=' + this.value"
+                class="bg-gray-50 text-gray-900 text-sm rounded-lg border border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 p-2">
+                @foreach ($campuses as $c)
+                    <option value="{{ $c->id }}" {{ $selectedCampus == $c->id ? 'selected' : '' }}>
+                        {{ $c->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
-            @foreach ($campus->buildings as $b)
-                <option value="{{ $b->id }}">
-                    {{ $b->name }}
-                </option>
-            @endforeach
-        </select>
+        {{-- Building Filter --}}
+        <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-600">Building:</label>
+            <select id="buildingFilter"
+                class="bg-gray-50 text-gray-900 text-sm rounded-lg border border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 p-2">
+                
+                <option value="">All Buildings</option>
+
+                @foreach ($campus->buildings as $b)
+                    <option value="{{ $b->id }}">
+                        {{ $b->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
     </div>
 
     {{-- BIN CARDS --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach ($smart_bins as $bin)
-            @if($bin->is_registered == TRUE)
-                @php
-                    if ($bin->status >= 71) {
-                        $colorClass = 'text-red-600';
-                        $borderColor = 'border-red-400';
-                        $bgAccent = 'bg-red-50';
-                        $label = 'Full';
-                        $dotColor = 'bg-red-500';
-                    } elseif ($bin->status >= 11) {
-                        $colorClass = 'text-amber-600';
-                        $borderColor = 'border-amber-400';
-                        $bgAccent = 'bg-amber-50';
-                        $label = 'Filled';
-                        $dotColor = 'bg-amber-500';
-                    } else {
-                        $colorClass = 'text-green-600';
-                        $borderColor = 'border-green-400';
-                        $bgAccent = 'bg-green-50';
-                        $label = 'Empty';
-                        $dotColor = 'bg-green-500';
-                    }
-                    $strokeDash = $bin->status . ', 100';
-                @endphp
+            @php
+                if ($bin->status >= 71) {
+                    $colorClass = 'text-red-600';
+                    $borderColor = 'border-red-400';
+                    $bgAccent = 'bg-red-50';
+                    $label = 'Full';
+                    $dotColor = 'bg-red-500';
+                } elseif ($bin->status >= 11) {
+                    $colorClass = 'text-amber-600';
+                    $borderColor = 'border-amber-400';
+                    $bgAccent = 'bg-amber-50';
+                    $label = 'Filled';
+                    $dotColor = 'bg-amber-500';
+                } else {
+                    $colorClass = 'text-green-600';
+                    $borderColor = 'border-green-400';
+                    $bgAccent = 'bg-green-50';
+                    $label = 'Empty';
+                    $dotColor = 'bg-green-500';
+                }
+                $strokeDash = $bin->status . ', 100';
+            @endphp
 
                 <div class="bin-item bg-white rounded-xl shadow-sm border {{ $borderColor }} border-l-4 p-5 hover:shadow-md transition-all cursor-pointer"
                     data-building="{{ $bin->building_id }}"
@@ -125,9 +140,24 @@
                         @endif
                     </div>
                 </div>
-            @endif
         @endforeach
     </div>
+
+    {{-- PAGINATION --}}
+    @if($smart_bins->hasPages())
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-sm text-gray-500">
+                Showing {{ $smart_bins->firstItem() }}–{{ $smart_bins->lastItem() }} of {{ $smart_bins->total() }} bins
+            </div>
+            <div>
+                {{ $smart_bins->links() }}
+            </div>
+        </div>
+    @else
+        <div class="mt-4 text-sm text-gray-500">
+            Showing {{ $smart_bins->total() }} {{ Str::plural('bin', $smart_bins->total()) }}
+        </div>
+    @endif
 </div>
 
 <script>

@@ -7,7 +7,19 @@
     <form method="GET" action="{{ route('homepage') }}" 
           class="flex flex-wrap items-end gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
         <input type="hidden" name="section" value="data">
-        <input type="hidden" name="campus" value="{{ $selectedCampus }}">
+
+        {{-- Campus Filter --}}
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Campus</label>
+            <select name="campus" onchange="this.form.submit()"
+                class="bg-gray-50 text-gray-900 text-sm rounded-lg border border-gray-300 focus:ring-emerald-500 focus:border-emerald-500 p-2 min-w-[160px]">
+                @foreach ($campuses as $c)
+                    <option value="{{ $c->id }}" {{ $selectedCampus == $c->id ? 'selected' : '' }}>
+                        {{ $c->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
         {{-- Building Filter --}}
         <div class="flex flex-col gap-1">

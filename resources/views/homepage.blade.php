@@ -4,8 +4,7 @@
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-
-<script src="https://cdn.tailwindcss.com"></script>
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -144,7 +143,65 @@
         @endif
 
     </main>
-    <div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-3"></div>
+
+    {{-- AI Chat Widget --}}
+    <div id="ai-chat-toggle"
+         onclick="toggleChat()"
+         class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg cursor-pointer flex items-center justify-center transition-all hover:scale-110">
+        <svg id="chat-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 20.25V5.625A2.625 2.625 0 016.375 3h11.25A2.625 2.625 0 0120.25 5.625v8.25a2.625 2.625 0 01-2.625 2.625H7.5L3.75 20.25z"/>
+        </svg>
+        <svg id="chat-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </div>
+
+    <div id="ai-chat-panel"
+         class="fixed bottom-24 right-6 z-50 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden hidden"
+         style="max-height: 500px;">
+
+        {{-- Chat Header --}}
+        <div class="bg-emerald-600 text-white px-5 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">D</div>
+                <div>
+                    <div class="font-semibold text-sm">Demeter AI</div>
+                    <div class="text-emerald-200 text-xs">Ask anything about waste data</div>
+                </div>
+            </div>
+            <button onclick="clearAiChat()" title="Clear chat history"
+                    class="p-1.5 rounded-lg hover:bg-white/20 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Chat Messages --}}
+        <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3" style="min-height: 300px;">
+            <div class="flex gap-2">
+                <div class="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold shrink-0">D</div>
+                <div class="bg-gray-100 text-gray-700 text-sm px-3 py-2 rounded-xl rounded-tl-none max-w-[80%]">
+                    Hi! I'm Demeter AI. Ask me anything about your campus waste data — like "Which building produces the most waste?" or "How many bins are full right now?"
+                </div>
+            </div>
+        </div>
+
+        {{-- Chat Input --}}
+        <div class="border-t border-gray-100 p-3">
+            <form id="ai-chat-form" onsubmit="sendAiMessage(event)" class="flex gap-2">
+                <input id="ai-chat-input" type="text" placeholder="Ask a question..."
+                       class="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                       autocomplete="off">
+                <button type="submit" id="ai-send-btn"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-24 z-[100] flex flex-col gap-3"></div>
 
     <script>
         function switchSection(sectionId) {
@@ -211,6 +268,119 @@
             toast.classList.add('opacity-0', 'translate-x-10'); // Slide out effect
             setTimeout(() => toast.remove(), 300);
         }, 4000);
+    }
+
+    // --- AI Chat Functions ---
+    function toggleChat() {
+        const panel = document.getElementById('ai-chat-panel');
+        const iconOpen = document.getElementById('chat-icon-open');
+        const iconClose = document.getElementById('chat-icon-close');
+
+        panel.classList.toggle('hidden');
+        iconOpen.classList.toggle('hidden');
+        iconClose.classList.toggle('hidden');
+    }
+
+    function addChatMessage(content, isUser = false) {
+        const container = document.getElementById('ai-chat-messages');
+
+        const wrapper = document.createElement('div');
+        wrapper.className = isUser ? 'flex gap-2 justify-end' : 'flex gap-2';
+
+        if (isUser) {
+            wrapper.innerHTML = `<div class="bg-emerald-600 text-white text-sm px-3 py-2 rounded-xl rounded-tr-none max-w-[80%]">${content}</div>`;
+        } else {
+            wrapper.innerHTML = `<div class="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold shrink-0">D</div><div class="bg-gray-100 text-gray-700 text-sm px-3 py-2 rounded-xl rounded-tl-none max-w-[80%] whitespace-pre-line">${content}</div>`;
+        }
+
+        container.appendChild(wrapper);
+        container.scrollTop = container.scrollHeight;
+        return wrapper;
+    }
+
+    async function sendAiMessage(e) {
+        e.preventDefault();
+
+        const input = document.getElementById('ai-chat-input');
+        const btn = document.getElementById('ai-send-btn');
+        const question = input.value.trim();
+
+        if (!question) return;
+
+        // Show user message
+        addChatMessage(question, true);
+        input.value = '';
+
+        // Show typing indicator
+        const typing = addChatMessage('Thinking...');
+        btn.disabled = true;
+        btn.textContent = '...';
+
+        try {
+            // Build headers — CSRF token is optional since /api/* is excluded
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            if (csrfMeta) {
+                headers['X-CSRF-TOKEN'] = csrfMeta.content;
+            }
+
+            console.log('Sending AI request...');
+
+            const res = await fetch('/api/ai/ask', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ question }),
+            });
+
+            console.log('AI response status:', res.status);
+
+            const data = await res.json();
+            typing.remove();
+
+            if (data.status === 'success') {
+                addChatMessage(data.answer);
+            } else {
+                addChatMessage('Sorry, something went wrong. Please try again.');
+                console.error('AI error response:', data);
+            }
+        } catch (err) {
+            typing.remove();
+            addChatMessage('Sorry, I could not reach the server. Please try again.');
+            console.error('AI fetch error:', err);
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Send';
+    }
+
+    // Clear the chat history (both server session and UI)
+    async function clearAiChat() {
+        try {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            if (csrfMeta) headers['X-CSRF-TOKEN'] = csrfMeta.content;
+
+            await fetch('/api/ai/ask', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ action: 'clear' }),
+            });
+        } catch (err) {
+            console.error('Failed to clear AI session:', err);
+        }
+
+        // Reset the chat UI
+        const container = document.getElementById('ai-chat-messages');
+        container.innerHTML = '';
+
+        // Re-add the welcome message
+        addChatMessage("Chat cleared! Ask me anything about your campus waste data.");
     }
     </script>
 </body>

@@ -8,7 +8,7 @@ use App\Models\WasteEntry;
 use App\Models\Building;
 use App\Models\Bin;
 use App\Http\Controllers\DashboardController;
-use App\Models\pivot;
+use App\Models\Pivot;
 
 class HomeController
 {
@@ -78,12 +78,15 @@ class HomeController
             if (!$data['campus']) {
                 $data['campus'] = Campus::with('buildings.smart_bins')->first();
             }
-            
+
+            // Pass all campuses so the switcher buttons can be rendered
+            $data['campuses'] = Campus::all();
         }
 
         elseif ($section === 'bin') {
             $campusId = request('campus', 1);
             $buildingId = request('building');
+            $perPage = $request->input('per_page', 12);
 
             if (!$campusId) {
                 $campusId = Campus::value('id');
@@ -97,11 +100,14 @@ class HomeController
                         $q->where('id', $buildingId);
                     }
                 })
+                ->where('is_registered', true)
                 ->with(['building', 'wasteEntries' => function($query) {
                     // Order by the date in your 'pivot' table
                     $query->orderBy('pivot.entry_date', 'desc');
                 }])
-                ->get();
+                ->orderBy('name')
+                ->paginate($perPage)
+                ->withQueryString();
 
             $data['selectedBuilding'] = $buildingId;
         }
@@ -117,39 +123,27 @@ class HomeController
             $data['campusToEdit'] = Campus::with('buildings')->find($campusId);
             $data['allCampuses'] = Campus::all();
 
-            $data['buildings'] = Building::where('campus_id', $campusId)->get();
+            // Load ALL buildings across all campuses (for the register-bin form)
+            $data['buildings'] = Building::all();
             $data['campus'] = Campus::find($campusId);
 
             if (!$data['campusToEdit']) {
                 $data['campusToEdit'] = Campus::with('buildings')->first();
             }
             //For Bin Stuff
-            $campusId = request('campus', 1);
-            $buildingId = request('building');
             $lastBin = Bin::latest('bin_id')->first();
-
             $data['nextBinId'] = $lastBin
                 ? $lastBin->bin_id + 1
                 : 1;
 
-            if (!$campusId) {
-                $campusId = Campus::value('id');
-            }
-
-            $data['campus'] = Campus::with('buildings')->find($campusId);
-
-            $data['smart_bins'] = Bin::whereHas('building', function ($q) use ($campusId, $buildingId) {
-                    $q->where('campus_id', $campusId);
-                    if ($buildingId) {
-                        $q->where('id', $buildingId);
-                    }
-                })
-                ->with(['building', 'wasteEntries' => function($query) {
-                    // Order by the date in your 'pivot' table
-                    $query->orderBy('pivot.entry_date', 'desc');
-                }])
+            // Load ALL bins (for unmatched + registered views)
+            $data['smart_bins'] = Bin::with('building')
                 ->get();
 
+            // If a specific bin_id is in the URL, load it for the register form
+            if ($request->has('bin_id')) {
+                $data['selectedBin'] = Bin::find($request->query('bin_id'));
+            }
         }
 
         return view('homepage', $data);

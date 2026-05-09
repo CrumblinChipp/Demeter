@@ -26,10 +26,15 @@ class DashboardController
 
         // 4. Summary Stats (Highest, Lowest, Average)
         $totalsArray = $dailyTotals->values()->toArray();
+        
+        $highest = $dailyTotals->max() ?? 0;
+        $lowest = $dailyTotals->isEmpty() ? 0 : $dailyTotals->min();
+        $highestDate = $highest > 0 ? $dailyTotals->search($highest) : 'N/A';
+        
         $summary = [
-            'highest' => $dailyTotals->max(),
-            'highest_date' => $dailyTotals->search($dailyTotals->max()),
-            'lowest'  => $dailyTotals->min(),
+            'highest' => $highest,
+            'highest_date' => $highestDate,
+            'lowest'  => $lowest,
             'average' => count($totalsArray) ? round(array_sum($totalsArray) / count($totalsArray), 2) : 0
         ];
 
@@ -39,27 +44,41 @@ class DashboardController
                         SUM(recyclable_kg) as recyclable, SUM(infectious_kg) as infectious')
             ->first();
 
-        // 6. Waste Per Building (Bar Chart total)
-        $perBuilding = (clone $baseQuery)
-            ->join('buildings', 'waste_entries.building_id', '=', 'buildings.id')
-            ->selectRaw('buildings.name, SUM(residual_kg + recyclable_kg + biodegradable_kg + infectious_kg) as total')
-            ->groupBy('buildings.name')
-            ->pluck('total', 'name');
+        // Get all buildings for this campus to ensure they all appear in the charts (even with 0 waste)
+        $buildings = Building::where('campus_id', $campusId)->get();
+        $buildingNames = $buildings->pluck('name');
 
-        // 6. Waste Per Building (Stacked Bar Chart Data)
-        $perBuildingWaste = (clone $baseQuery)
-            ->join('buildings', 'waste_entries.building_id', '=', 'buildings.id')
+        // 6. Waste Per Building (Bar Chart total)
+        $perBuildingWasteData = (clone $baseQuery)
             ->selectRaw('
-                buildings.name, 
+                building_id,
                 SUM(biodegradable_kg) as bio, 
                 SUM(residual_kg) as res, 
                 SUM(recyclable_kg) as rec, 
                 SUM(infectious_kg) as inf,
                 SUM(residual_kg + recyclable_kg + biodegradable_kg + infectious_kg) as total
             ')
-            ->groupBy('buildings.name')
+            ->groupBy('building_id')
             ->get()
-            ->keyBy('name');
+            ->keyBy('building_id');
+
+        $perBuilding = collect();
+        $perBuildingWaste = collect();
+
+        foreach ($buildings as $b) {
+            $data = $perBuildingWasteData->get($b->id);
+            
+            $perBuilding[$b->name] = $data ? (float)$data->total : 0;
+            
+            $perBuildingWaste[$b->name] = [
+                'name'  => $b->name,
+                'bio'   => $data ? (float)$data->bio : 0,
+                'res'   => $data ? (float)$data->res : 0,
+                'rec'   => $data ? (float)$data->rec : 0,
+                'inf'   => $data ? (float)$data->inf : 0,
+                'total' => $data ? (float)$data->total : 0,
+            ];
+        }
 
         // Bin Status Overview
         $binStatus = Bin::whereHas('building', fn($q) => $q->where('campus_id', $campusId))
@@ -81,7 +100,6 @@ class DashboardController
             'binStatus'       => $binStatus,
             'selectedCampus'  => $campusId,
             'selectedDays'    => $days,
-            'campuses'        => Campus::all()
         ];
     }
 

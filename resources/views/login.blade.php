@@ -19,7 +19,7 @@
 <body class="bg-gradient-to-br from-[#0f2027] via-[#203a43] 
     to-[#2c5364] min-h-screen flex items-center justify-center p-5 font-sans">
     <div class="bg-white/95 rounded-[20px] shadow-2xl overflow-hidden w-full max-w-[900px] 
-                flex flex-col md:flex-row min-h-[550px]">
+                flex flex-col md:flex-row min-h-[700px]">
         
         <div class="bg-gradient-to-br from-emerald-500 to-emerald-800 p-10 md:w-1/2 flex flex-col 
                     justify-center items-center text-white text-center">
@@ -34,7 +34,7 @@
             </div>
         </div>
 
-        <div class="flex-1 p-10 flex flex-col justify-center">
+        <div class="flex-1 p-10 flex flex-col">
             
             <div class="flex gap-5 mb-8 border-b-2 border-gray-200">
                 <div id="tab-login" onclick="switchTab('login')" class="pb-2 cursor-pointer font-semibold transition-all border-b-4 border-emerald-500 text-emerald-600">
@@ -47,7 +47,7 @@
             </div>
 
             @if ($errors->any())
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-5 text-sm">
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-5 text-sm" id="error-banner">
                     <ul class="list-disc pl-5">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -56,11 +56,11 @@
                 </div>
             @endif
 
-            <div href="#login" id="login-form" class="fade-in block">
+            <div href="#login" id="login-form" class="fade-in flex flex-1 flex-col">
                 <h2 class="text-emerald-800 text-3xl font-semibold mb-2">Welcome Back</h2>
-                <p class="text-gray-500 text-sm mb-8">Please enter your credentials to login</p>
+                <p class="text-gray-500 text-sm mb-6">Please enter your credentials to login</p>
 
-                <form  action="{{ route('login') }}" method="POST" class="space-y-5">
+                <form  action="{{ route('login') }}" method="POST" class="space-y-5 flex-1 flex flex-col">
                     @csrf
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-700">Email Address</label>
@@ -81,6 +81,8 @@
                         <label for="remember">Remember me</label>
                     </div>
 
+                    <div class="flex-1"></div>
+
                     <button type="submit" class="w-full py-3.5 bg-gradient-to-br from-emerald-500 to-emerald-700 
                                             text-white font-bold rounded-lg shadow-md hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all active:translate-y-0">
                         Login
@@ -92,7 +94,7 @@
                 </div>
             </div>
 
-            <div href="#register" id="register-form" class="fade-in hidden">
+            <div href="#register" id="register-form" class="fade-in hidden flex-1 flex flex-col">
                 <h2 class="text-emerald-800 text-3xl font-semibold mb-2 text-wrap">Create Account</h2>
                 <p class="text-gray-500 text-sm mb-6">Please fill in the information below</p>
 
@@ -160,7 +162,7 @@
                         <input type="password" name="password_confirmation" required placeholder="Confirm password"
                             class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:outline-none">
                     </div>
-                        <div class="mt-4 flex items-start gap-2 text-xs text-gray-600">
+                    <div class="mt-4 flex items-start gap-2 text-xs text-gray-600">
                         <input type="checkbox" id="terms" name="terms" required>
                         <label for="terms">I agree to the Terms & Conditions</label>
                     </div>
@@ -169,10 +171,6 @@
                                             rounded-lg shadow-md hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all">
                         Create Account
                     </button>
-            </div>
-                <div class="text-center mt-6 text-sm text-gray-500">
-                    Already have an account? <a href="#" onclick="switchTab('login')" class="text-emerald-500 font-bold hover:underline">Login here</a>
-                </div>
                 </form>
             </div>
         </div>
@@ -186,11 +184,12 @@
         const registerTab = document.getElementById('tab-register');
 
         if (tab === 'login') {
-            // URL logic: update hash without reloading
             window.location.hash = 'login';
 
-            loginForm.classList.replace('hidden', 'block');
-            registerForm.classList.replace('block', 'hidden');
+            loginForm.classList.remove('hidden');
+            loginForm.classList.add('flex');
+            registerForm.classList.remove('flex');
+            registerForm.classList.add('hidden');
             
             loginTab.classList.add('border-emerald-500', 'text-emerald-600');
             loginTab.classList.remove('border-transparent', 'text-gray-400');
@@ -198,11 +197,12 @@
             registerTab.classList.add('border-transparent', 'text-gray-400');
             registerTab.classList.remove('border-emerald-500', 'text-emerald-600');
         } else {
-            // URL logic: update hash without reloading
             window.location.hash = 'register';
 
-            registerForm.classList.replace('hidden', 'block');
-            loginForm.classList.replace('block', 'hidden');
+            registerForm.classList.remove('hidden');
+            registerForm.classList.add('flex');
+            loginForm.classList.remove('flex');
+            loginForm.classList.add('hidden');
 
             registerTab.classList.add('border-emerald-500', 'text-emerald-600');
             registerTab.classList.remove('border-transparent', 'text-gray-400');

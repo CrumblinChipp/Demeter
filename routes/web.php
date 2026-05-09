@@ -38,12 +38,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Add Campus
     Route::post('/campus', [CampusController::class, 'store'])->name('campus.store');
 
+    // Bin: create new bin from scratch
     Route::post('/bins/register', [BinController::class, 'storeBin'])->name('bins.register');
 
+    // Bin: register existing unmatched bin (set is_registered = true)
     Route::put('/bins/update', [BinController::class, 'updateBin'])->name('bins.update');
 
 });
-
 
 Route::put('/buildings/{building}/coordinates', [BuildingController::class, 'updateCoordinates'])
     ->name('buildings.coordinates.update');
@@ -54,3 +55,6 @@ Route::get('/api/campuses/{campus}/buildings', function ($campusId) {
 
 // Bin Collection — auto-creates waste entry when a bin is emptied
 Route::post('/api/bins/collect', [WasteEntryController::class, 'collect'])->name('bins.collect');
+
+// AI Chat — Gemini-powered Q&A about waste data
+Route::post('/api/ai/ask', [\App\Http\Controllers\AiController::class, 'ask'])->name('ai.ask');

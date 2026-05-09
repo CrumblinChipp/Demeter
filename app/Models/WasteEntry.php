@@ -36,4 +36,9 @@ class WasteEntry extends Model
     {
         return $this->belongsTo(Building::class);
     }
+
+    public function getTotalWeightAttribute()
+    {
+        return $this->residual_kg + $this->recyclable_kg + $this->biodegradable_kg + $this->infectious_kg;
+    }
 }
