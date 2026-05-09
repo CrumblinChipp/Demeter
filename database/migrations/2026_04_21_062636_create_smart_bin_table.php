@@ -34,6 +34,8 @@ return new class extends Migration
 
             $table->bollean('is_registered')->default(false);
 
+            $table->bollean('is_detected')->default(false);
+
 
          });
     }

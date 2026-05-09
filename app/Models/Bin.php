@@ -23,6 +23,7 @@ class Bin extends Model
         'capacity',
         'installed_at',
         'is_registered',
+        'is_detected',
     ];
 
     protected $casts = [

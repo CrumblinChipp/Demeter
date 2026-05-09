@@ -28,7 +28,7 @@ Route::delete('/waste/{waste}', [WasteEntryController::class, 'destroy'])->name(
 Route::post('/waste/store', [WasteEntryController::class, 'store'])->name('waste.store');
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    
+
     // Update Campus (Handles the name, map upload, and buildings)
     Route::put('/campus/{campus}', [CampusController::class, 'update'])->name('campus.update');
     
@@ -40,7 +40,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::post('/bins/register', [BinController::class, 'storeBin'])->name('bins.register');
 
+    Route::put('/bins/update', [BinController::class, 'updateBin'])->name('bins.update');
+
 });
+
 
 Route::put('/buildings/{building}/coordinates', [BuildingController::class, 'updateCoordinates'])
     ->name('buildings.coordinates.update');

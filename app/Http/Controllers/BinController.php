@@ -35,6 +35,7 @@ class BinController
           'status'        => 0,
           'current_weight'=> 0,
           'is_registered' => false,
+          'is_detected'   => false,
           'installed_at'  => now(),
       ]);
 
@@ -45,4 +46,23 @@ class BinController
           'campus'  => $building->campus_id,
       ])->with('success', 'Bin registered successfully.');
   }
+  public function updateBin(Request $request)
+    {
+        $request->validate([
+            'bin_id' => 'required|exists:smart_bins,bin_id',
+        ]);
+
+        try {
+            $bin = Bin::findOrFail($request->bin_id);
+
+            $bin->update([
+                'is_registered' => true,
+            ]);
+
+            return redirect()->back()->with('success', 'Bin registered successfully!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Something went wrong. Please try again.');
+        }
+    }
 }

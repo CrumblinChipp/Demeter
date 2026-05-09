@@ -66,6 +66,7 @@ class BinSeeder extends Seeder
                     'capacity'       => $maxCapacity,
                     'installed_at'   => now(),
                     'is_registered'  => true,
+                    'is_detected'    => true,
                 ]); 
 
                 $deviceCounter++;
