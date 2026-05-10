@@ -1,6 +1,6 @@
 # Demeter - Intelligent Waste Management Platform
 
-**Live Website:** [Insert Your Railway Link Here]
+**Live Website:** [demeter-production-7e52.up.railway.app]
 
 Demeter is a state-of-the-art, AI-powered waste management system designed to optimize waste collection and monitoring for university campuses. Built with Laravel and integrated with Google's Gemini AI, Demeter provides real-time analytics, automated scheduling, and an interactive assistant to streamline campus sustainability efforts.
 
