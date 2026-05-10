@@ -8,8 +8,10 @@ RUN apt-get update && apt-get install -y \
 
 
 
-RUN a2enmod rewrite && \
-    rm -f /etc/apache2/mods-available/mpm_worker.* /etc/apache2/mods-available/mpm_event.* && \
+RUN a2enmod rewrite
+
+RUN echo "# Disable conflicting MPM modules\n<IfModule mpm_worker_module>\n  # mpm_worker disabled\n</IfModule>\n<IfModule mpm_event_module>\n  # mpm_event disabled\n</IfModule>" > /etc/apache2/conf-available/disable-mpm.conf && \
+    a2enconf disable-mpm && \
     rm -f /etc/apache2/mods-enabled/mpm_worker.* /etc/apache2/mods-enabled/mpm_event.* && \
     a2enmod mpm_prefork
 
