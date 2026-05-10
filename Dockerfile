@@ -6,8 +6,11 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ── Fix MPM conflict ───────────────────────────────────────────────
-RUN a2dismod mpm_event mpm_worker || true \
+# ── Aggressively fix MPM conflict ─────────────────────────────────
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.conf \
+          /etc/apache2/mods-enabled/mpm_event.load \
+          /etc/apache2/mods-enabled/mpm_worker.conf \
+          /etc/apache2/mods-enabled/mpm_worker.load \
     && a2enmod mpm_prefork
 
 RUN a2enmod rewrite
@@ -39,20 +42,15 @@ RUN mkdir -p storage/logs \
 RUN echo "opcache.enable=1\nopcache.memory_consumption=128\nopcache.max_accelerated_files=4000\nopcache.validate_timestamps=0" \
     > /usr/local/etc/php/conf.d/opcache.ini
 
-# ── Write entrypoint — PORT is substituted at runtime ─────────────
 RUN printf '#!/bin/bash\n\
 set -e\n\
-\n\
-# Substitute real PORT value into Apache config at runtime\n\
 sed -i "s/Listen 80/Listen $PORT/" /etc/apache2/ports.conf\n\
 sed -i "s/*:80/*:$PORT/" /etc/apache2/sites-available/000-default.conf\n\
-\n\
 php artisan config:cache\n\
 php artisan route:cache\n\
 php artisan view:cache\n\
 php artisan migrate --force\n\
 php artisan storage:link 2>/dev/null || true\n\
-\n\
 exec "$@"\n' > /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh
 
